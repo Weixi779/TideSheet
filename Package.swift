@@ -18,15 +18,19 @@ let package = Package(
             dependencies: ["TideSheetDomain"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
-            ]
+            ],
         ),
         .target(
             name: "TideSheetSwiftUI",
             dependencies: ["TideSheetDomain"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
-            ]
+            ],
+        ),
+        .testTarget(
+            name: "TideSheetDomainTests",
+            dependencies: ["TideSheetDomain"],
         ),
     ],
-    swiftLanguageModes: [.v6]
+    swiftLanguageModes: [.v6],
 )
