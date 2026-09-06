@@ -32,6 +32,11 @@ let package = Package(
             dependencies: ["TideSheet"],
         ),
         .testTarget(
+            name: "TideSheetUIKitTests",
+            dependencies: ["TideSheet", "TideSheetUIKit"],
+            swiftSettings: [.defaultIsolation(MainActor.self)],
+        ),
+        .testTarget(
             name: "TideSheetSwiftUITests",
             dependencies: ["TideSheet", "TideSheetSwiftUI"],
             swiftSettings: [

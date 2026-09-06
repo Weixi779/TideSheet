@@ -198,7 +198,7 @@ Both contexts reuse one SwiftUI presentation state and surface. The initial moda
 
 Ordinary modal dismissal closes the custom surface, removes the carrier, and then invokes `onDismiss` once. A replacement item waits for that sequence. Application navigation belongs in application code; pushing the underlying stack does not bring that route above an active modal.
 
-The [attached guide](SwiftUI-Attached-Sheet.md) and [modal guide](SwiftUI-Bottom-Sheet.md) document input validation, item updates, measurement, dismissal, and host-lifetime exceptions. These initial defaults do not establish a complete keyboard, styling, scrolling, or platform-adaptation contract.
+The [attached guide](SwiftUI-Attached-Sheet.md) and [modal guide](SwiftUI-Bottom-Sheet.md) document input validation, item updates, measurement, dismissal, and host-lifetime exceptions. Styling and platform-adaptation details beyond those initial defaults remain open.
 
 ### 12. Content Owns Safe-Area Usage, Keyboard Layout, and Scrolling
 
@@ -211,6 +211,14 @@ TideSheet does not observe keyboard notifications or implement keyboard-driven m
 TideSheet does not implement scroll-view gesture handoff or take ownership of content scroll state. The current SwiftUI renderer resizes and dismisses through its indicator region. Flexible-content sizing remains a separate layout concern; it does not imply scroll tracking or handoff.
 
 These are intentional ownership boundaries carried over from the existing project's BottomSheet contract. They are not missing features or prerequisites for starting the UIKit renderer.
+
+### 13. Initial UIKit Interface
+
+UIKit owners use `presentBottomSheet` or `attachBottomSheet` with a native `UIViewController` and an immutable `BottomSheetConfiguration`. Configuration carries the shared detent set and initial ID alongside UIKit-specific appearance and dismissal options. Content, fixed, fractional, and maximum policies all use the same shared resolver; the old application's separate fixed/content and medium/large domain types are not reproduced.
+
+`BottomSheetHandler` weakly controls dismissal, content-size invalidation, and detent selection. It exposes the current selected ID and a settled-selection callback. Presentation completion, one-shot `onDismiss`, and an explicit dismissal completion describe different lifecycle events. The surface, presentation controller, attachment controller, and transition remain internal.
+
+Both contexts reuse one UIKit surface and interaction implementation. The initial interface preserves the existing application's presentation and containment approach while keeping Router behavior, content keyboard layout, and scroll state outside the renderer. See the [UIKit guide](UIKit-Bottom-Sheet.md) for the supported contract and validation limits.
 
 ## Explicit Non-Goals
 
@@ -225,20 +233,19 @@ TideSheet is not:
 - an exact replica of every system-sheet behavior;
 - a UIKit implementation disguised as a native SwiftUI API;
 - a back-deployment library for iOS versions before iOS 17;
-- a public general-purpose geometry engine.
+- a public general-purpose geometry engine;
+- a content safe-area policy or automatic keyboard-avoidance layer;
+- a scroll-view gesture coordinator or owner of application scroll state.
 
 ## Open Decisions
 
 The following are not yet public contracts:
 
-- concrete UIKit presentation and attachment entry points;
-- the accepted UIKit content unit and both cross-content bridge APIs;
-- cross-renderer selection and lifecycle behavior beyond the initial SwiftUI contract;
-- UIKit handler APIs for dismissal, invalidation, and lifecycle callbacks;
+- both cross-content bridge APIs;
+- cross-renderer selection and lifecycle behavior beyond the initial native contracts;
 - drag thresholds, velocity rules, cancellation, and animation curves;
-- scroll-view handoff behavior;
-- keyboard, safe-area, rotation, compact-height, iPad, and multi-scene policy;
-- renderer-specific styling for corner radius, grabber, dimming, backgrounds, and custom content;
+- rotation, compact-height, iPad, multi-scene behavior, and validation of native safe-area propagation;
+- further renderer-specific styling beyond the initial UIKit configuration and SwiftUI defaults;
 - accessibility focus, dismissal, announcement, Reduce Motion, and Dynamic Type contracts;
 - multiple attached sheets, stacking, replacement, and teardown ordering;
 - lifecycle notification for an externally retained, offscreen host removed by an arbitrary navigation-stack rewrite;
