@@ -8,28 +8,28 @@ let package = Package(
         .iOS(.v17),
     ],
     products: [
-        .library(name: "TideSheetUIKit", targets: ["TideSheetUIKit"]),
-        .library(name: "TideSheetSwiftUI", targets: ["TideSheetSwiftUI"]),
+        .library(name: "TideSheetUIKit", targets: ["TideSheet", "TideSheetUIKit"]),
+        .library(name: "TideSheetSwiftUI", targets: ["TideSheet", "TideSheetSwiftUI"]),
     ],
     targets: [
-        .target(name: "TideSheetDomain"),
+        .target(name: "TideSheet"),
         .target(
             name: "TideSheetUIKit",
-            dependencies: ["TideSheetDomain"],
+            dependencies: ["TideSheet"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
             ],
         ),
         .target(
             name: "TideSheetSwiftUI",
-            dependencies: ["TideSheetDomain"],
+            dependencies: ["TideSheet"],
             swiftSettings: [
                 .defaultIsolation(MainActor.self),
             ],
         ),
         .testTarget(
-            name: "TideSheetDomainTests",
-            dependencies: ["TideSheetDomain"],
+            name: "TideSheetTests",
+            dependencies: ["TideSheet"],
         ),
     ],
     swiftLanguageModes: [.v6],

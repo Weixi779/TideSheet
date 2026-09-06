@@ -7,26 +7,26 @@
 
 import Foundation
 
-package struct TideSheetDetent: Hashable {
-    package struct Id: RawRepresentable, Hashable {
-        package let rawValue: String
+public struct TideSheetDetent: Hashable, Sendable {
+    public struct Id: RawRepresentable, Hashable, Sendable {
+        public let rawValue: String
 
-        package init(rawValue: String) {
+        public init(rawValue: String) {
             self.rawValue = rawValue
         }
     }
 
-    package enum Height: Hashable {
+    public enum Height: Hashable, Sendable {
         case content(maximum: CGFloat? = nil)
         case fixed(CGFloat)
         case fraction(CGFloat)
         case maximum
     }
 
-    package let id: Id
-    package let height: Height
+    public let id: Id
+    public let height: Height
 
-    package init(id: Id, height: Height) {
+    public init(id: Id, height: Height) {
         self.id = id
         self.height = height
     }

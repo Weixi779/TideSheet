@@ -7,7 +7,7 @@
 
 import Foundation
 import Testing
-import TideSheetDomain
+import TideSheet
 
 @Suite("TideSheet detent layout")
 struct TideSheetDetentLayoutTests {
