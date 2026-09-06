@@ -86,12 +86,14 @@ If the host's SwiftUI state is released, its active presentation also emits a on
 
 ## Geometry and current limits
 
-The backdrop covers the modal container. Maximum sheet height excludes the top safe area while the surface reaches the bottom edge. Side and bottom content padding participate in intrinsic fitting measurement; declared heights continue to describe the complete outer surface, including the indicator region.
+The backdrop covers the modal container. Maximum sheet height excludes the top safe area while the surface reaches the bottom edge. Declared heights describe the complete outer surface, including the indicator region, without an additional bottom safe-area allowance. TideSheet adds no uniform side or bottom safe-area padding to content. Any padding chosen by content participates in its fitting measurement.
 
-The initial modal path shares the attached surface's single intrinsic-content hierarchy. Content is top-aligned and clipped to the selected height. Vertically flexible views and scroll views need an explicit content height; automatic filling and scroll handoff remain future work.
+Content and its host decide how to use native safe-area and keyboard layout behavior. TideSheet has no safe-area policy, keyboard tracking, keyboard-driven movement or resizing, or automatic scrolling to an input. Native SwiftUI layout responses still belong to the framework and the owning host. See the [content ownership decision](Design-Decisions.md#12-content-owns-safe-area-usage-keyboard-layout-and-scrolling).
+
+The initial modal path shares the attached surface's single intrinsic-content hierarchy. Content is top-aligned and clipped to the selected height. Vertically flexible views and scroll views need an explicit content height; automatic filling remains follow-up layout work. Scroll-view gesture handoff is outside the component's scope.
 
 Runtime validation covers portrait iPhone 17 Pro Max on iOS 26.5: all four API combinations, small-view presentation, detent selection, drag dismissal, item updates/replacement, repeated closure, system dismissal, and navigation ordering. Screenshots also verify the transparent backdrop and independent scope. The package compiles with an iOS 17 deployment target, but minimum-version runtime checks have not been performed.
 
-Keyboard policy, rotation, compact height, iPad, multi-scene behavior, the full accessibility matrix, visual and animation configuration, multiple-sheet coordination, and UIKit content remain future work. This is an initial SwiftUI modal slice, not a tagged release or the completed cross-renderer contract.
+Rotation, compact height, iPad, multi-scene behavior, the full accessibility matrix, visual and animation configuration, multiple-sheet coordination, and UIKit content remain future work. Content keyboard layout and scrolling remain content responsibilities. This is an initial SwiftUI modal slice, not a tagged release or the completed cross-renderer contract.
 
 See the [runnable example](../Examples/AttachedSheet/README.md) and [roadmap](Roadmap.md).

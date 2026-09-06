@@ -200,6 +200,18 @@ Ordinary modal dismissal closes the custom surface, removes the carrier, and the
 
 The [attached guide](SwiftUI-Attached-Sheet.md) and [modal guide](SwiftUI-Bottom-Sheet.md) document input validation, item updates, measurement, dismissal, and host-lifetime exceptions. These initial defaults do not establish a complete keyboard, styling, scrolling, or platform-adaptation contract.
 
+### 12. Content Owns Safe-Area Usage, Keyboard Layout, and Scrolling
+
+TideSheet owns the outer surface geometry. Declared heights describe the final outer frame without an additional bottom safe-area allowance. Modal geometry respects the container's top boundary; attached geometry follows the explicitly chosen host.
+
+Content decides which elements extend to its edges and which respect native safe-area or keyboard layout information. TideSheet does not provide a safe-area policy, add uniform safe-area padding around content, or modify UIKit `additionalSafeAreaInsets`. UIKit content uses the normally propagated safe-area and keyboard layout guides. SwiftUI content and its host use native SwiftUI layout behavior; the renderer does not replace that behavior with a second inset policy.
+
+TideSheet does not observe keyboard notifications or implement keyboard-driven movement, resizing, focus tracking, or scrolling to an input. Content and its host own input layout. Native framework layout responses are distinct from a TideSheet keyboard-avoidance feature.
+
+TideSheet does not implement scroll-view gesture handoff or take ownership of content scroll state. The current SwiftUI renderer resizes and dismisses through its indicator region. Flexible-content sizing remains a separate layout concern; it does not imply scroll tracking or handoff.
+
+These are intentional ownership boundaries carried over from the existing project's BottomSheet contract. They are not missing features or prerequisites for starting the UIKit renderer.
+
 ## Explicit Non-Goals
 
 TideSheet is not:

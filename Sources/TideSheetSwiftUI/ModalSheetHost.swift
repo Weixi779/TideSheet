@@ -27,7 +27,6 @@ struct ModalSheetHost<Item: Identifiable, SheetContent: View>: View {
                         state: state,
                         presentation: presentation,
                         availableHeight: geometry.size.height + safeArea.bottom,
-                        contentInsets: EdgeInsets(top: 0, leading: safeArea.leading, bottom: safeArea.bottom, trailing: safeArea.trailing),
                         onDismissed: { removeCarrier(presentation.id) },
                         sheetContent: sheetContent,
                     )

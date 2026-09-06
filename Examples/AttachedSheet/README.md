@@ -10,7 +10,7 @@ Attached pages demonstrate content and host resizing, local view state, and navi
 
 Modal pages apply `bottomSheet` to a small button. They demonstrate full-width independent presentation, underlying navigation while the sheet stays visible, and navigation from `onDismiss`. They also compare closure through the sheet environment, the external binding, and SwiftUI's system dismiss action.
 
-The indicator is the drag region in both contexts. Content remains intrinsically measured in this initial example; the app does not demonstrate scroll handoff or general flexible-content layout.
+The indicator is the drag region in both contexts. Content owns its padding, keyboard layout, and scrolling; TideSheet does not add safe-area padding or scroll-view gesture handoff. Content remains intrinsically measured in this initial example, and general flexible-content layout remains follow-up work.
 
 Run the scheme's UI tests with **Product > Test**. Core and renderer state tests belong to the package's `TideSheet-Package` scheme.
 

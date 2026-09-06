@@ -14,7 +14,6 @@ struct SheetPresentationContent<Item: Identifiable, SheetContent: View>: View {
     let state: SheetPresentationState<Item>
     let presentation: SheetPresentationState<Item>.Presentation
     let availableHeight: CGFloat
-    var contentInsets = EdgeInsets()
     let onDismissed: () -> Void
     let sheetContent: (Item) -> SheetContent
 
@@ -37,7 +36,6 @@ struct SheetPresentationContent<Item: Identifiable, SheetContent: View>: View {
             isDismissing: presentation.isDismissing,
             actions: state.actions(for: presentation.id),
             onDismissed: onDismissed,
-            contentInsets: contentInsets,
             content: { sheetContent(currentItem) },
         )
     }

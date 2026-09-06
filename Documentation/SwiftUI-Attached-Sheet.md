@@ -94,7 +94,9 @@ The host's bounds define available height and backdrop coverage. Give the host t
 
 Content, fixed, fractional, and maximum height policies describe the complete outer surface, including its 28-point drag-indicator region. Heights are clamped to the measured host height. `.content` uses the content's fitting height at the available width; content and host size changes automatically re-resolve the layout. Equal physical heights retain the logical selected ID.
 
-This slice measures a single intrinsically sized content hierarchy. Content is top-aligned and clipped to the selected height. A scroll view or other vertically flexible content needs an explicit content height; automatic scroll handoff and filling flexible content to the selected detent are not implemented yet.
+This slice measures a single intrinsically sized content hierarchy. Content is top-aligned and clipped to the selected height. A scroll view or other vertically flexible content needs an explicit content height; filling flexible content to the selected detent remains follow-up layout work. Scroll-view gesture handoff is outside the component's scope.
+
+Content and its host decide how to use native safe-area and keyboard layout behavior. TideSheet adds no uniform safe-area padding to content and implements no keyboard tracking, keyboard-driven movement, or scrolling to an input. An attachment still follows any size changes made by its owning host. See the [content ownership decision](Design-Decisions.md#12-content-owns-safe-area-usage-keyboard-layout-and-scrolling).
 
 Drag the indicator region to resize. Gesture cancellation resets the transient drag without committing a detent. Settlement uses projected drag position and the nearest physical resting point; a downward projection below 60% of the lowest point requests dismissal. The body does not install a drag recognizer over application controls.
 
@@ -102,6 +104,6 @@ The initial appearance uses a rounded surface, a dimming layer, and spring anima
 
 For an independent modal scope, use [`bottomSheet`](SwiftUI-Bottom-Sheet.md). It shares these detent, selection, content-identity, and interaction rules, with an additional native modal lifecycle before `onDismiss`.
 
-Scroll handoff, keyboard policy, full platform adaptation, configurable visuals and animation, and multiple-sheet coordination remain future work. No tagged release or cross-renderer completeness is implied.
+Full platform adaptation, configurable visuals and animation, and multiple-sheet coordination remain future work. Content keyboard layout and scrolling remain content responsibilities. No tagged release or cross-renderer completeness is implied.
 
 See the [standalone example](../Examples/AttachedSheet/README.md) for all four overloads, content and host resizing, item updates, navigation, and drag interaction.
