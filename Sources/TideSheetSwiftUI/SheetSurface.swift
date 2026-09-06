@@ -15,6 +15,7 @@ struct SheetSurface<Content: View>: View {
     let isDismissing: Bool
     let actions: SheetActions
     let onDismissed: () -> Void
+    var contentInsets = EdgeInsets()
     @ViewBuilder let content: () -> Content
 
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -64,6 +65,7 @@ struct SheetSurface<Content: View>: View {
 
                 content()
                     .environment(\.sheet, actions)
+                    .padding(contentInsets)
             }
             .frame(maxWidth: .infinity)
             .fixedSize(horizontal: false, vertical: true)

@@ -179,9 +179,9 @@ TideSheet is under active development, and public API may change before 1.0.
 
 This freedom permits deliberate API correction. It does not justify ambiguous ownership, hidden imports, compatibility aliases, or premature exposure of renderer internals.
 
-### 11. SwiftUI Attachment and Selection
+### 11. SwiftUI Presentation and Selection
 
-The native SwiftUI entry point is `attachedSheet`, with separate `isPresented: Binding<Bool>` and `item: Binding<Item?>` overloads. Item content requires `Identifiable`, without an additional `Equatable` requirement.
+The native SwiftUI entry points are `attachedSheet` for composition inside an explicit host and `bottomSheet` for independent modal presentation. Both have separate `isPresented: Binding<Bool>` and `item: Binding<Item?>` overloads. Item content requires `Identifiable`, without an additional `Equatable` requirement.
 
 Detents are configured as a `Set<TideSheetDetent>`. IDs must still be unique: value equality in a set does not enforce identifier uniqueness. Physical drag order is resolved from measured heights; set iteration order has no presentation meaning.
 
@@ -194,7 +194,11 @@ Ordinary content updates, layout changes, and navigation away and back do not re
 
 Sheet content uses the custom `@Environment(\.sheet)` value to call `dismiss()` or `selectDetent(_:)`. Actions belong to one presentation and become inert when it ends. They do not control navigation or locate another presenter. Native SwiftUI content measurement does not require a public invalidation action.
 
-The initial attached implementation's dismissal, input-validation, item-update, and measurement behavior is documented in the [SwiftUI API guide](SwiftUI-Attached-Sheet.md). These defaults do not establish a modal, keyboard, styling, or scrolling contract for later work.
+Both contexts reuse one SwiftUI presentation state and surface. The initial modal implementation uses `fullScreenCover` with a transparent presentation background as its native carrier. TideSheet owns the surface, detents, drag interaction, backdrop, and surface animation. The carrier choice is internal; there is no public UIKit presenter or carrier configuration.
+
+Ordinary modal dismissal closes the custom surface, removes the carrier, and then invokes `onDismiss` once. A replacement item waits for that sequence. Application navigation belongs in application code; pushing the underlying stack does not bring that route above an active modal.
+
+The [attached guide](SwiftUI-Attached-Sheet.md) and [modal guide](SwiftUI-Bottom-Sheet.md) document input validation, item updates, measurement, dismissal, and host-lifetime exceptions. These initial defaults do not establish a complete keyboard, styling, scrolling, or platform-adaptation contract.
 
 ## Explicit Non-Goals
 
@@ -216,9 +220,8 @@ TideSheet is not:
 The following are not yet public contracts:
 
 - concrete UIKit presentation and attachment entry points;
-- the SwiftUI modal entry point and carrier;
 - the accepted UIKit content unit and both cross-content bridge APIs;
-- shared selection and lifecycle behavior beyond the initial SwiftUI attachment contract;
+- cross-renderer selection and lifecycle behavior beyond the initial SwiftUI contract;
 - UIKit handler APIs for dismissal, invalidation, and lifecycle callbacks;
 - drag thresholds, velocity rules, cancellation, and animation curves;
 - scroll-view handoff behavior;

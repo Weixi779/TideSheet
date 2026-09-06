@@ -65,7 +65,7 @@ public extension View {
     ) -> some View {
         overlay {
             AttachedSheetHost(
-                input: AttachedSheetInput(item: item, detents: detents, selection: .initial(initialDetent), onDismiss: onDismiss),
+                input: SheetPresentationInput(item: item, detents: detents, selection: .initial(initialDetent), onDismiss: onDismiss),
                 sheetContent: content,
             )
         }
@@ -81,59 +81,34 @@ public extension View {
     ) -> some View {
         overlay {
             AttachedSheetHost(
-                input: AttachedSheetInput(item: item, detents: detents, selection: .bound(selectedDetent), onDismiss: onDismiss),
+                input: SheetPresentationInput(item: item, detents: detents, selection: .bound(selectedDetent), onDismiss: onDismiss),
                 sheetContent: content,
             )
         }
     }
 }
 
-private struct BooleanSheetItem: Identifiable {
-    let id = true
-}
-
-private func booleanSheetItem(_ binding: Binding<Bool>) -> Binding<BooleanSheetItem?> {
-    Binding(
-        get: { binding.wrappedValue ? BooleanSheetItem() : nil },
-        set: { binding.wrappedValue = $0 != nil },
-    )
-}
-
 private struct AttachedSheetHost<Item: Identifiable, SheetContent: View>: View {
-    let input: AttachedSheetInput<Item>
+    let input: SheetPresentationInput<Item>
     let sheetContent: (Item) -> SheetContent
-    @State private var state = AttachedSheetState<Item>()
+    @State private var state = SheetPresentationState<Item>()
 
     var body: some View {
-        // Read the bindings in body so external changes invalidate this host.
-        let item = input.item.wrappedValue
-        let selection = input.selection.value
         GeometryReader { geometry in
             if let presentation = state.presentation {
-                let currentItem = item.flatMap {
-                    !presentation.isDismissing && $0.id == presentation.item.id ? $0 : nil
-                } ?? presentation.item
-                let activeInput = presentation.isDismissing ? presentation.input : input
-                let selectedId = if case .bound = activeInput.selection {
-                    presentation.isDismissing ? presentation.selectedDetent : selection
-                } else {
-                    activeInput.detents.contains { $0.id == presentation.internalSelection }
-                        ? presentation.internalSelection : activeInput.selection.value
-                }
-                SheetSurface(
-                    detents: activeInput.detents,
-                    selectedDetent: selectedId,
+                SheetPresentationContent(
+                    input: input,
+                    state: state,
+                    presentation: presentation,
                     availableHeight: geometry.size.height,
-                    isDismissing: presentation.isDismissing,
-                    actions: state.actions(for: presentation.id),
                     onDismissed: { state.finishDismissal(presentation.id) },
-                    content: { sheetContent(currentItem) },
+                    sheetContent: sheetContent,
                 )
                 .id(presentation.id)
             }
         }
         // Item need not be Equatable. Refresh input snapshots without publishing
         // payload-only changes back into SwiftUI and causing an update loop.
-        .onReceive(Just(input)) { state.update($0) }
+        .onReceive(Just((input.item.wrappedValue, input.selection.value))) { _ in state.update(input) }
     }
 }

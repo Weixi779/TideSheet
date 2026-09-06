@@ -1,5 +1,5 @@
 //
-//  AttachedSheetState.swift
+//  SheetPresentationState.swift
 //  TideSheet
 //
 //  Created by weixi on 2026/9/6.
@@ -21,7 +21,7 @@ enum SheetSelection {
     }
 }
 
-struct AttachedSheetInput<Item: Identifiable> {
+struct SheetPresentationInput<Item: Identifiable> {
     let item: Binding<Item?>
     let detents: Set<TideSheetDetent>
     let selection: SheetSelection
@@ -35,9 +35,9 @@ struct AttachedSheetInput<Item: Identifiable> {
 }
 
 @Observable
-final class AttachedSheetState<Item: Identifiable> {
+final class SheetPresentationState<Item: Identifiable> {
     @Observable
-    final class Presentation {
+    final class Presentation: Identifiable {
         let id = UUID()
         var isDismissing = false
         var internalSelection: TideSheetDetent.Id
@@ -45,11 +45,11 @@ final class AttachedSheetState<Item: Identifiable> {
         // Updated inputs are read by the host's existing SwiftUI dependencies.
         // Keeping the last item also preserves its final content during dismissal.
         @ObservationIgnored var item: Item
-        @ObservationIgnored var input: AttachedSheetInput<Item>
+        @ObservationIgnored var input: SheetPresentationInput<Item>
         @ObservationIgnored var lastValidSelection: TideSheetDetent.Id
         @ObservationIgnored private var closingSelection: TideSheetDetent.Id?
 
-        init(item: Item, input: AttachedSheetInput<Item>) {
+        init(item: Item, input: SheetPresentationInput<Item>) {
             self.item = item
             self.input = input
             internalSelection = input.selection.value
@@ -73,13 +73,13 @@ final class AttachedSheetState<Item: Identifiable> {
     }
 
     private(set) var presentation: Presentation?
-    @ObservationIgnored private var input: AttachedSheetInput<Item>?
+    @ObservationIgnored private var input: SheetPresentationInput<Item>?
 
     isolated deinit {
         presentation?.input.onDismiss?()
     }
 
-    func update(_ input: AttachedSheetInput<Item>) {
+    func update(_ input: SheetPresentationInput<Item>) {
         self.input = input
         reconcile()
     }
@@ -141,4 +141,15 @@ final class AttachedSheetState<Item: Identifiable> {
             presentation = Presentation(item: item, input: input)
         }
     }
+}
+
+struct BooleanSheetItem: Identifiable {
+    let id = true
+}
+
+func booleanSheetItem(_ binding: Binding<Bool>) -> Binding<BooleanSheetItem?> {
+    Binding(
+        get: { binding.wrappedValue ? BooleanSheetItem() : nil },
+        set: { binding.wrappedValue = $0 != nil },
+    )
 }

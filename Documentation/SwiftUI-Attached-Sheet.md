@@ -100,6 +100,8 @@ Drag the indicator region to resize. Gesture cancellation resets the transient d
 
 The initial appearance uses a rounded surface, a dimming layer, and spring animation. Tapping the backdrop dismisses. Accessibility adjustment on the indicator switches resting points, accessibility escape requests dismissal, and Reduce Motion disables the default animation. These are initial defaults, not a complete accessibility or styling API.
 
-Independent modal presentation, scroll handoff, keyboard policy, full platform adaptation, configurable visuals and animation, and multiple-sheet coordination remain future work. No tagged release or cross-renderer completeness is implied.
+For an independent modal scope, use [`bottomSheet`](SwiftUI-Bottom-Sheet.md). It shares these detent, selection, content-identity, and interaction rules, with an additional native modal lifecycle before `onDismiss`.
+
+Scroll handoff, keyboard policy, full platform adaptation, configurable visuals and animation, and multiple-sheet coordination remain future work. No tagged release or cross-renderer completeness is implied.
 
 See the [standalone example](../Examples/AttachedSheet/README.md) for all four overloads, content and host resizing, item updates, navigation, and drag interaction.

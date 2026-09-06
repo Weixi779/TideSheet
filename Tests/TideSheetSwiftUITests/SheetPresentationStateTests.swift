@@ -1,5 +1,5 @@
 //
-//  AttachedSheetStateTests.swift
+//  SheetPresentationStateTests.swift
 //  TideSheet
 //
 //  Created by weixi on 2026/9/6.
@@ -10,8 +10,8 @@ import Testing
 import TideSheet
 @testable import TideSheetSwiftUI
 
-@Suite("Attached sheet ownership")
-struct AttachedSheetStateTests {
+@Suite("Sheet presentation ownership")
+struct SheetPresentationStateTests {
     private let compact = TideSheetDetent(id: .init(rawValue: "compact"), height: .fixed(200))
     private let expanded = TideSheetDetent(id: .init(rawValue: "expanded"), height: .maximum)
 
@@ -36,7 +36,7 @@ struct AttachedSheetStateTests {
     @Test
     func `Updates content without resetting internal selection`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         let input = input(item)
         state.update(input)
         let presentation = try #require(state.presentation)
@@ -54,7 +54,7 @@ struct AttachedSheetStateTests {
     func `External selection is the single source of truth`() throws {
         let item = Storage<Item?>(Item(id: 1))
         let selection = Storage(compact.id)
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         let input = input(item, selection: .bound(selection.binding))
         state.update(input)
         let presentation = try #require(state.presentation)
@@ -74,7 +74,7 @@ struct AttachedSheetStateTests {
     @Test
     func `Dismissal writes once and notifies only after completion`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         var dismissals = 0
         state.update(input(item, onDismiss: {
             #expect(state.presentation == nil)
@@ -98,7 +98,7 @@ struct AttachedSheetStateTests {
     @Test
     func `New item survives old actions and completion`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         var dismissals = 0
         let input = input(item, onDismiss: { dismissals += 1 })
         state.update(input)
@@ -130,14 +130,14 @@ struct AttachedSheetStateTests {
     func `Replacing configuration freezes the old external selection during dismissal`() throws {
         let item = Storage<Item?>(Item(id: 1))
         let selection = Storage(expanded.id)
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         state.update(input(item, selection: .bound(selection.binding)))
         let old = try #require(state.presentation)
 
         let replacement = TideSheetDetent(id: .init(rawValue: "replacement"), height: .fixed(300))
         item.value = Item(id: 2)
         selection.value = replacement.id
-        state.update(AttachedSheetInput(
+        state.update(SheetPresentationInput(
             item: item.binding,
             detents: [replacement],
             selection: .bound(selection.binding),
@@ -153,7 +153,7 @@ struct AttachedSheetStateTests {
     @Test
     func `A new presentation reapplies the initial detent`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         let input = input(item)
         state.update(input)
         let first = try #require(state.presentation)
@@ -173,18 +173,18 @@ struct AttachedSheetStateTests {
     @Test
     func `Removing an internally selected detent returns to the configured initial detent`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         state.update(input(item))
         let presentation = try #require(state.presentation)
         state.select(expanded.id, in: presentation.id)
-        state.update(AttachedSheetInput(item: item.binding, detents: [compact], selection: .initial(compact.id), onDismiss: nil))
+        state.update(SheetPresentationInput(item: item.binding, detents: [compact], selection: .initial(compact.id), onDismiss: nil))
         #expect(presentation.selectedDetent == compact.id)
     }
 
     @Test
     func `External dismissal does not write the binding again`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         let input = input(item)
         state.update(input)
         let presentation = try #require(state.presentation)
@@ -198,7 +198,7 @@ struct AttachedSheetStateTests {
     @Test
     func `Reentrant dismissal callback can request another presentation`() throws {
         let item = Storage<Item?>(Item(id: 1))
-        let state = AttachedSheetState<Item>()
+        let state = SheetPresentationState<Item>()
         state.update(input(item, onDismiss: { item.value = Item(id: 2) }))
         let first = try #require(state.presentation)
         state.dismiss(first.id)
@@ -210,7 +210,7 @@ struct AttachedSheetStateTests {
     func `Releasing the host ends the presentation without clearing shared state`() throws {
         let item = Storage<Item?>(Item(id: 1))
         var dismissals = 0
-        var state: AttachedSheetState<Item>? = AttachedSheetState()
+        var state: SheetPresentationState<Item>? = SheetPresentationState()
         state?.update(input(item, onDismiss: { dismissals += 1 }))
         let presentation = try #require(state?.presentation)
         let actions = try #require(state?.actions(for: presentation.id))
@@ -234,8 +234,8 @@ struct AttachedSheetStateTests {
         _ item: Storage<Item?>,
         selection: SheetSelection? = nil,
         onDismiss: (() -> Void)? = nil,
-    ) -> AttachedSheetInput<Item> {
-        AttachedSheetInput(
+    ) -> SheetPresentationInput<Item> {
+        SheetPresentationInput(
             item: item.binding,
             detents: [compact, expanded],
             selection: selection ?? .initial(compact.id),

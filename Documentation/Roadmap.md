@@ -42,7 +42,7 @@ The current foundation includes:
 - renderer products that include the shared module while keeping imports explicit;
 - no public `typealias`, exported import, umbrella module, or old domain-module name.
 
-The core tests cover detent resolution. The first native SwiftUI attachment is implemented below. The UIKit renderer remains a placeholder, and no independent modal or cross-content API is implemented yet.
+The core tests cover detent resolution. Initial native SwiftUI attached and modal slices are implemented below. The UIKit renderer remains a placeholder, and no cross-content API is implemented yet.
 
 ### Verified baseline
 
@@ -95,6 +95,28 @@ See the [SwiftUI API guide](SwiftUI-Attached-Sheet.md) for the current public co
 
 A pure SwiftUI application can attach, resize, drag, select, and dismiss a SwiftUI sheet without importing or executing the UIKit renderer.
 
+## Done — Initial Native SwiftUI Modal Slice
+
+### Deliverables
+
+- `bottomSheet` overloads with the same Boolean/item presentation and internal/external selection choices as `attachedSheet`.
+- A SwiftUI `fullScreenCover` carrier with a transparent background and independent presentation scope.
+- Reuse of the attached implementation's state, content identity, detent resolution, surface, and indicator interaction.
+- TideSheet-owned surface animation, with the carrier opening and closing without an additional transition for ordinary TideSheet actions.
+- Surface dismissal, carrier removal, and one-shot `onDismiss` in that order; item replacement waits for carrier completion.
+- Reconciliation when content invokes SwiftUI's system `dismiss` action directly.
+- Initial safe-area geometry: the backdrop reaches the container edges, the maximum surface avoids the top safe area, and fitting measurement includes bottom content padding.
+
+### Validation
+
+- All 23 core and renderer unit tests pass after sharing the presentation state between contexts.
+- All 10 example UI tests pass on iPhone 17 Pro Max / iOS 26.5, including the existing attached scenarios.
+- Modal scenarios cover all four overloads, full-width presentation from a small button, selection through actions and bindings, drag dismissal, repeated presentation, same-ID updates, replacement, external closure, and system dismissal.
+- Navigation scenarios verify that a modal remains above an underlying push with content state intact, and that navigation from `onDismiss` occurs after closure. Captured screenshots confirm transparent backdrop coverage and the separate modal scope.
+- The deployment target remains iOS 17; this runtime validation covers portrait iPhone on iOS 26.5. Minimum-version, rotation, keyboard, iPad, accessibility, and arbitrary host-removal checks remain follow-up work.
+
+See the [modal guide](SwiftUI-Bottom-Sheet.md) for the supported lifecycle and current limits. This slice retains the attached surface's intrinsic-content measurement path.
+
 ## Next — Complete the SwiftUI Presentation Contract
 
 ### Goal
@@ -103,18 +125,14 @@ Make `TideSheetSwiftUI` coherent across attached and independent modal presentat
 
 ### Deliverables
 
-- A native SwiftUI modal carrier with an independent presentation lifetime.
-- TideSheet-owned visuals, detents, and interaction rather than system-sheet styling.
-- Reuse of the same SwiftUI surface and interaction model across attached and modal contexts.
-- Defined programmatic and interactive dismissal ordering.
-- Validate the initial attachment's detent-update behavior across both contexts.
+- Extend detent-update, cancellation, and host-teardown validation across both contexts.
 - Flexible content layout and scroll content measurement beyond the initial fitting-content path.
 - Scroll handoff for documented SwiftUI scrolling content.
 - Keyboard and safe-area adaptation.
 - Dynamic Type, VoiceOver, Reduce Motion, and compact-height behavior.
 - Renderer-owned SwiftUI style and backdrop customization.
 
-The modal carrier must be selected from implementation evidence. The roadmap does not yet promise `.sheet`, `fullScreenCover`, or a particular hosting mechanism.
+The initial modal carrier is implemented and verified above. The next work extends content layout and interaction without moving presentation ownership out of SwiftUI.
 
 ### Validation
 
@@ -184,7 +202,7 @@ Each root, content, and context combination must work while the root renderer re
 
 | Root renderer | Content | Attached | Modal |
 | --- | --- | --- | --- |
-| SwiftUI | SwiftUI | Planned | Planned |
+| SwiftUI | SwiftUI | Initial slice | Initial slice |
 | SwiftUI | UIKit | Planned | Planned |
 | UIKit | UIKit | Planned | Planned |
 | UIKit | SwiftUI | Planned | Planned |
