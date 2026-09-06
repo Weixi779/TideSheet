@@ -1,8 +1,10 @@
 # TideSheet
 
-A native UIKit and SwiftUI bottom sheet for modal, root-scoped, and host-attached presentation.
+TideSheet is an in-progress custom bottom-sheet library designed for UIKit and SwiftUI roots, with modal and host-attached presentation contexts.
 
-> TideSheet is under active development. Its public API is not available yet.
+> TideSheet is under active development. Its public API may change before 1.0.
+
+The shared detent domain and the first native SwiftUI attached-sheet implementation are available. Independent modal presentation, the UIKit renderer, and cross-content bridges remain on the roadmap.
 
 ## Requirements
 
@@ -12,6 +14,27 @@ A native UIKit and SwiftUI bottom sheet for modal, root-scoped, and host-attache
 
 ## Modules
 
-- `TideSheetUIKit` owns presentation for a UIKit root and accepts UIKit or SwiftUI content.
-- `TideSheetSwiftUI` owns presentation for a SwiftUI root and accepts SwiftUI or UIKit content.
-- `TideSheetDomain` is an internal target for shared sheet semantics, geometry, and interaction decisions.
+- `TideSheet` is the canonical public module for shared sheet values and rules.
+- `TideSheetUIKit` will own presentation for a UIKit root and accept UIKit or SwiftUI content. It is currently a placeholder.
+- `TideSheetSwiftUI` supports host-attached SwiftUI content. Modal presentation and UIKit content are planned.
+
+Choose one renderer product. It includes the shared `TideSheet` module, and source files import both modules explicitly:
+
+```swift
+import TideSheet
+import TideSheetUIKit
+```
+
+or:
+
+```swift
+import TideSheet
+import TideSheetSwiftUI
+```
+
+## Project Direction
+
+- [SwiftUI attached-sheet API and current limits](Documentation/SwiftUI-Attached-Sheet.md)
+- [Runnable SwiftUI example](Examples/AttachedSheet/README.md)
+- [Design decisions](Documentation/Design-Decisions.md)
+- [Roadmap](Documentation/Roadmap.md)

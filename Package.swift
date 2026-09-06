@@ -31,6 +31,13 @@ let package = Package(
             name: "TideSheetTests",
             dependencies: ["TideSheet"],
         ),
+        .testTarget(
+            name: "TideSheetSwiftUITests",
+            dependencies: ["TideSheet", "TideSheetSwiftUI"],
+            swiftSettings: [
+                .defaultIsolation(MainActor.self),
+            ],
+        ),
     ],
     swiftLanguageModes: [.v6],
 )
