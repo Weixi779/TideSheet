@@ -4,7 +4,7 @@ TideSheet is an in-progress custom bottom-sheet library designed for UIKit and S
 
 > TideSheet is under active development. Its public API may change before 1.0.
 
-The shared detent domain and initial native UIKit and SwiftUI attached and modal sheets are available. System content-bridge examples are included for both directions. Dedicated bridge APIs, further SwiftUI content layout, and broader platform validation remain on the roadmap.
+The unified presentation API, initial UIKit and SwiftUI renderers, and both runnable example apps are implemented. System content-bridge examples are included for both directions. The next phase is first-prerelease validation and delivery; see [Release Readiness](Documentation/Release-Readiness.md). No version tag has been published yet.
 
 Content owns safe-area usage, keyboard layout, and scrolling. TideSheet does not add a content inset policy, automatic keyboard avoidance, or scroll-view gesture handoff.
 
@@ -49,11 +49,13 @@ Open [Examples/TideSheetExamples.xcworkspace](Examples/TideSheetExamples.xcworks
 
 ## Project Direction
 
+- [Documentation reading guide](Documentation/README.md)
+- [Release readiness and remaining work](Documentation/Release-Readiness.md)
 - [Cross-content bridge experiments and API questions](Documentation/Cross-Content-Bridges.md)
 - [UIKit bottom-sheet API and lifetime](Documentation/UIKit-Bottom-Sheet.md)
 - [Runnable UIKit example](Examples/UIKit/README.md)
 - [SwiftUI attached-sheet API and current limits](Documentation/SwiftUI-Attached-Sheet.md)
-- [SwiftUI modal bottom-sheet API and lifecycle](Documentation/SwiftUI-Bottom-Sheet.md)
+- [SwiftUI unified bottom-sheet API and modal lifecycle](Documentation/SwiftUI-Bottom-Sheet.md)
 - [Runnable SwiftUI example](Examples/SwiftUI/README.md)
 - [Design decisions](Documentation/Design-Decisions.md)
 - [Roadmap](Documentation/Roadmap.md)

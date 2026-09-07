@@ -73,12 +73,12 @@ The content bridge adapters live in the examples. The unified API adds the share
 
 The focused UI scenarios exercise both adapters in both presentation contexts. They check dynamic content height, programmatic selection, content-state retention through updates and navigation, dismissal, and reopening. The UIKit-root scenarios also exercise completion-driven navigation. The SwiftUI-root scenarios exercise same-ID updates and different-ID replacement.
 
-Validation of the unified API includes all 35 package unit tests and all 12 UIKit example UI tests, including both content-bridge scenarios. The SwiftUI example suite covers both content directions alongside native presentation behavior. Formatting, project-file validation, and local documentation links also pass. See the [SwiftUI attached verification](SwiftUI-Attached-Sheet.md#verification) for navigation and rotation coverage.
+Validation of the unified API includes all 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests, including the content-bridge scenarios. Formatting, project-file validation, and local documentation links also pass. See the [SwiftUI attached verification](SwiftUI-Attached-Sheet.md#verification) for navigation and rotation coverage.
 
 The build deployment target is iOS 17. Runtime checks use portrait iPhone 17 Pro Max on iOS 26.5. Minimum-version runtime, rotation, iPad, arbitrary content teardown and memory profiling, full accessibility, keyboard layout across both content frameworks, and general flexible-content measurement remain outside this experiment. This evidence does not establish complete bridge or release support.
 
-## API Judgment To Make Next
+## Candidate Convenience APIs
 
 The samples establish that existing TideSheet entry points already compose with system adapters. The remaining application code is content sizing, state projection, and action wiring. The two directions have different responsibilities, so a symmetric wrapper API would need more justification than matching names.
 
-A UIKit SwiftUI-builder convenience could remove hosting-controller assembly, but it must still state how content reports fitting height and receives controls. A SwiftUI controller wrapper could remove boilerplate only after identifying a stable controller sizing and update contract. Those are candidates for the next API discussion, not accepted public declarations in this experiment.
+A UIKit SwiftUI-builder convenience could remove hosting-controller assembly, but it must still state how content reports fitting height and receives controls. A SwiftUI controller wrapper could remove boilerplate only after identifying a stable controller sizing and update contract. Those remain candidates for a later API discussion, not prerequisites for publishing the existing recipes. The next delivery phase is described in [Release Readiness](Release-Readiness.md).

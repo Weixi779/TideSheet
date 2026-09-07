@@ -72,7 +72,7 @@ The indicator exposes accessibility adjustment, escape respects the dismissal op
 
 Modal uses `UIPresentationController` and a custom transition. An underlying navigation push stays behind it. Dismissing through the handler removes the sheet and its descendant modal presentations, then finishes the request.
 
-Attached uses child containment on the chosen host. An ordinary push and pop preserves the sheet and content state. Explicit dismissal removes its child hierarchy; a visible host's ordinary exit also ends the attachment. `onDismiss` is one-shot across observable teardown paths. Do not use ordinary `viewDidDisappear` as a signal that a retained route's sheet has ended.
+Attached uses child containment and the view bounds of the chosen host. Attaching to a content controller does not automatically extend coverage above its navigation controller's bar. An ordinary push and pop preserves the sheet and content state. Explicit dismissal removes its child hierarchy; a visible host's ordinary exit also ends the attachment. `onDismiss` is one-shot across observable teardown paths. Do not use ordinary `viewDidDisappear` as a signal that a retained route's sheet has ended.
 
 An attached handler removes its local sheet hierarchy; it does not dismiss native pages presented by the host. Content or application navigation should return from such a page before closing the attachment.
 
@@ -85,3 +85,5 @@ The [standalone UIKit example](../Examples/UIKit/README.md) uses only the `TideS
 All 12 UIKit UI tests pass on iPhone 17 Pro Max / iOS 26.5. They cover the unified `presentation` parameter, both SwiftUI-content bridge scenarios, modal and attached navigation, returning to attached content from a native modal, dynamic preferred-size updates, repeated dismissal, immediate dismissal during entry, descendant modal closure, native content keyboard layout, and scrolling without sheet resizing. The deployment target is iOS 17. Minimum-version runtime, rotation, iPad, full accessibility, and arbitrary navigation cancellation/removal remain follow-up validation.
 
 This initial slice accepts native UIKit content. A [system-adapter example](Cross-Content-Bridges.md) also hosts SwiftUI through `UIHostingController` using these same entry points; dedicated bridge conveniences remain open. No tagged release or complete capability-matrix support is implied.
+
+See [Release Readiness](Release-Readiness.md) for the remaining validation and delivery work.

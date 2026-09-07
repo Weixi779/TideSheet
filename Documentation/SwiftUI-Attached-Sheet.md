@@ -120,3 +120,5 @@ The [cross-content experiments](Cross-Content-Bridges.md) also demonstrate a UIK
 The September 7 unified-API revision passes all 18 SwiftUI UI tests on iPhone 17 Pro Max / iOS 26.5. The checks include full navigation-bar and bottom-edge coverage from a small button, real backdrop tap interception, ordinary push/pop, interactive return and cancellation, source-page removal, a native sheet opened from attached content, portrait/landscape rotation, detent and item state, changing the next presentation style, and both content frameworks. Final result attachments contain no runtime hierarchy warnings. Screenshots verify the navigation mask and bottom surface.
 
 The iOS 17 deployment target builds, but minimum-version runtime, iPad, multi-scene and tab/split-view combinations, and the complete accessibility matrix remain unverified.
+
+The [release checklist](Release-Readiness.md) separates those validation gaps from optional new capabilities.

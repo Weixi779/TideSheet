@@ -4,7 +4,7 @@
 >
 > Last updated: September 7, 2026
 
-This document records decisions that define TideSheet's direction. It describes accepted boundaries, not implementation order or current feature availability. See the [roadmap](Roadmap.md) for delivery status.
+This document records decisions that define TideSheet's direction. It describes accepted boundaries, not implementation order or current feature availability. See the [roadmap](Roadmap.md) for delivery status and [Release Readiness](Release-Readiness.md) for the current release audit.
 
 An implementation idea does not become a decision merely because it appears in the roadmap. Unresolved contracts remain listed under **Open Decisions**.
 
@@ -242,7 +242,7 @@ TideSheet is not:
 
 The following are not yet public contracts:
 
-- both cross-content bridge APIs;
+- dedicated cross-content convenience APIs beyond the verified system-adapter examples;
 - cross-renderer selection and lifecycle behavior beyond the initial native contracts;
 - drag thresholds, velocity rules, cancellation, and animation curves;
 - rotation, compact-height, iPad, multi-scene behavior, and validation of native safe-area propagation;
@@ -250,6 +250,6 @@ The following are not yet public contracts:
 - accessibility focus, dismissal, announcement, Reduce Motion, and Dynamic Type contracts;
 - multiple attached sheets, stacking, replacement, and teardown ordering;
 - lifecycle notification for an externally retained, offscreen host removed by an arbitrary navigation-stack rewrite;
-- example structure, visual regression strategy, release versioning, and support policy.
+- broader visual regression strategy, release versioning, and support policy. The two independent example apps and shared workspace are already implemented.
 
 Open decisions may appear in the roadmap as work to investigate or deliver. They must not be documented as supported behavior until their contract is accepted and verified.

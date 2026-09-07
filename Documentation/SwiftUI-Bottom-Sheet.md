@@ -2,6 +2,16 @@
 
 `bottomSheet` is the single SwiftUI entry point. `presentation: .modal` (the default) establishes an independent modal scope. `presentation: .attached` follows the declaring page through navigation. Both cover their presentation container, including navigation chrome, even when declared on a small button. See the [attached behavior](SwiftUI-Attached-Sheet.md) for page ownership.
 
+If page A opens a sheet and then pushes page B:
+
+| Event | `.modal` | `.attached` |
+| --- | --- | --- |
+| Push B | The sheet remains above B. | The sheet leaves with A. |
+| Return to A | The same presentation remains open unless dismissed. | The same content and selected detent return. |
+| Temporary navigation away | Does not dismiss the presentation. | Hides it without calling `onDismiss`. |
+
+The setting describes the relationship with the declaring page, not a local-versus-full-screen mask choice. Both styles still require an owned declaration; `.modal` is not a global lifetime guarantee.
+
 ## Public API
 
 ```swift
@@ -100,4 +110,4 @@ Runtime validation covers portrait iPhone 17 Pro Max on iOS 26.5: all four API c
 
 Rotation, compact height, iPad, multi-scene behavior, the full accessibility matrix, visual and animation configuration, and multiple-sheet coordination remain future work. A [UIKit-content example](Cross-Content-Bridges.md) now uses the system representable API; dedicated bridge conveniences remain open. Content keyboard layout and scrolling remain content responsibilities. This is an initial SwiftUI modal slice, not a tagged release or the completed cross-renderer contract.
 
-See the [runnable example](../Examples/SwiftUI/README.md) and [roadmap](Roadmap.md).
+See the [runnable example](../Examples/SwiftUI/README.md), [roadmap](Roadmap.md), and [release checklist](Release-Readiness.md).

@@ -8,6 +8,8 @@ TideSheet is a pre-1.0, iOS 17+ bottom-sheet library built with Swift 6.2. This 
 
 The accepted architectural boundary lives in [Design Decisions](Design-Decisions.md). If implementation evidence challenges that boundary, update the decision explicitly instead of silently changing ownership in code.
 
+The unified API and two example apps are complete. The next phase is first-prerelease validation and delivery, not another required API layer. [Release Readiness](Release-Readiness.md) records the current audit and recommended gates. The native-slice sections below retain milestone-era validation results; the latest aggregate result is 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests, all passing on iOS 26.5.
+
 ## Direction
 
 TideSheet has one canonical shared module and two native renderers:
@@ -31,6 +33,14 @@ Content owns safe-area usage, keyboard layout, and scrolling. Automatic keyboard
 - **Next**: The next intended implementation slice.
 - **Later**: Ordered work whose details may still change from evidence.
 - **Deferred**: Outside the initial roadmap until a concrete consumer establishes a requirement.
+
+## Done — Unified Presentation API and Navigation Coverage
+
+The single entry in each renderer accepts `SheetPresentation`: `.modal` by default or `.attached`. SwiftUI captures the style per presentation, retaining the original carrier during dismissal and applying changes on the next opening. Example call sites and guides use this entry without compatibility aliases.
+
+The attached SwiftUI carrier belongs to the declaring page while covering its containing navigation area. A local UIKit adapter coordinates the rendering container and navigation visibility; the SwiftUI state, surface, content, environment, measurement, and gestures stay in `TideSheetSwiftUI`. Navigation delegates and application paths remain application-owned. UIKit continues to use child containment in the explicitly chosen host's bounds.
+
+The final September 7 regression passes 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests on iPhone 17 Pro Max / iOS 26.5. Verification includes declaration from a small control, navigation-bar tap interception, bottom-edge coverage, ordinary and interactive navigation, retained content, nested native presentation, rotation, and style changes between presentations. Portrait and landscape screenshots were inspected. Minimum-version runtime and broader platform adaptation remain open.
 
 ## Done — Canonical Core Baseline
 
@@ -159,7 +169,7 @@ See the [UIKit guide](UIKit-Bottom-Sheet.md) for the current public contract. Ar
 
 A UIKit application can use modal and attached TideSheet presentation with UIKit content and the same documented domain semantics as the SwiftUI renderer.
 
-## Next — Cross-Content Bridges
+## Done — Initial System-Adapter Examples
 
 ### Goal
 
@@ -169,11 +179,10 @@ Allow the root to keep presentation ownership regardless of content technology.
 
 - SwiftUI content hosted by `TideSheetUIKit`.
 - UIKit controller-backed content hosted by `TideSheetSwiftUI`.
-- Correct content measurement, safe-area propagation, appearance, replacement, and teardown.
-- Bridge-specific public conveniences derived from real sample consumers.
+- Concrete intrinsic-content or preferred-height contracts, content updates, and navigation retention.
 - No renderer-to-renderer dependency and no duplicated sheet engine.
 
-The exact public APIs should be accepted only after both bridge samples establish whether they require a `UIView`, `UIViewController`, SwiftUI builder, or another renderer-specific boundary.
+These examples use the existing public entry points and system adapters. Dedicated bridge conveniences remain candidates; they do not block use of the current recipes.
 
 ### Initial system-bridge examples
 
@@ -181,13 +190,13 @@ The exact public APIs should be accepted only after both bridge samples establis
 - The SwiftUI example hosts a controller through `UIViewControllerRepresentable`, using the existing SwiftUI entry points and environment actions. The concrete controller's preferred-height changes update an explicit SwiftUI content frame.
 - Each example still depends on only its root renderer product. No new public bridge wrapper, module, or renderer-to-renderer dependency has been added.
 - Focused UI scenarios cover both directions in both contexts, including height changes, content updates, navigation retention, dismissal, and reopening. The SwiftUI-root scenarios also exercise item replacement.
-- September 7 validation passes: 34 package unit tests, the full 12-test SwiftUI example suite, and 2 UIKit bridge UI tests. Bridge testing also fixed modal item reconciliation and replacement after the presenting SwiftUI route moves offscreen; native SwiftUI content now has regression coverage for that same sequence.
+- The final unified-API validation includes these scenarios in 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests. Bridge testing also fixed modal item reconciliation and replacement after the presenting SwiftUI route moves offscreen; native SwiftUI content has regression coverage for that same sequence.
 
 See [Cross-Content Bridge Experiments](Cross-Content-Bridges.md) for the sizing contracts, validation evidence, and remaining API questions. These examples are the evidence-gathering portion of this milestone; they do not establish a generic bridge API or complete capability-matrix support.
 
 ### Capability matrix
 
-Each root, content, and context combination must work while the root renderer remains the sole presentation owner:
+All eight root/content/presentation combinations have native or system-adapter example coverage. The full validation matrix remains broader than these examples:
 
 | Root renderer | Content | Attached | Modal |
 | --- | --- | --- | --- |
@@ -205,9 +214,21 @@ For every supported combination, verify:
 - appearance and safe-area propagation;
 - repeated presentation without retained hosts or duplicate callbacks.
 
-### Exit condition
+### Broader capability exit condition
 
-All eight root/content/context combinations satisfy the published contract without moving ownership into bridged content.
+All eight root/content/context combinations satisfy the declared supported contract without moving ownership into bridged content. Generic bridge API design and arbitrary content support remain later work, with requirements established by real consumers.
+
+## Next — First Prerelease Validation and Delivery
+
+Use the existing public surface and runnable examples to close the [release checklist](Release-Readiness.md#recommended-gates-before-tagging):
+
+1. Choose and document the preview support matrix and version stage.
+2. Run minimum-runtime, Release/device-build, and independent remote-consumer checks.
+3. Extend navigation, compact-height, teardown/release, accessibility, and content-owned input-layout validation for the selected matrix.
+4. Add repeatable CI, versioned installation instructions, and release notes with known limits.
+5. Publish and verify the chosen tag and prerelease when authorized.
+
+The first implementation slice in that phase should validate minimum-runtime, packaging, and lifecycle behavior. Additional API design is driven by a demonstrated failure or consumer need, not by making the two content-adapter directions look symmetric.
 
 ## Later — SwiftUI Content Layout and Validation
 
@@ -216,27 +237,24 @@ The initial SwiftUI attached and modal paths are implemented. The following rema
 - Flexible content layout beyond the initial fitting-content path, including explicit sizing for scroll content without adopting its gesture or scroll state.
 - Detent-update, cancellation, and host-teardown validation across both contexts.
 - Native safe-area propagation and content-owned input layout in representative samples.
-- Rotation, compact height, Dynamic Type, VoiceOver, and Reduce Motion checks.
+- Adaptation and accessibility checks beyond the first prerelease matrix. SwiftUI attached rotation already has a focused regression scenario.
 - Renderer-owned SwiftUI style and backdrop customization.
 
 Validate these against both presentation contexts and preserve one-shot dismissal and content identity. This work does not introduce automatic keyboard avoidance, uniform content safe-area padding, or scroll-view gesture handoff.
 
 ## Later — Pre-1.0 Hardening
 
-### Deliverables
+### Remaining deliverables
 
 - Audit public names, access control, actor isolation, and `Sendable` conformance.
-- Document presentation contexts, lifecycle, detent semantics, supported scrolling, and migration behavior.
-- Provide focused SwiftUI-root and UIKit-root examples.
-- Add DocC documentation for the supported public surface.
-- Add minimum-deployment and current-toolchain CI.
-- Add accessibility, memory, repeated-presentation, and interaction regression coverage.
-- Record breaking 0.x changes with migration notes.
-- Add release-facing contribution, changelog, support, and security guidance.
+- Extend the existing guides and focused example apps as new supported behavior is accepted.
+- Add DocC documentation and collect real consumer feedback on the public surface.
+- Extend accessibility, memory, repeated-presentation, and interaction coverage beyond the first prerelease baseline.
+- Record subsequent breaking 0.x changes and establish contribution/support guidance as the project gains consumers.
 
 ### First release decision
 
-Do not label placeholder targets or planned cells as supported. Choose the first tagged release only after deciding whether it is a focused SwiftUI preview or a complete capability-matrix release. The release notes and README must state that scope exactly.
+The renderer targets are implemented. The recommendation is a pre-1.0 prerelease of both renderer products and the documented system-adapter recipes, with an explicit validation matrix and known limits. The exact version and support scope remain to be chosen; see [Release Readiness](Release-Readiness.md#recommended-first-release). A first prerelease does not imply complete capability-matrix support or 1.0 stability.
 
 ### 1.0 exit condition
 
@@ -262,11 +280,3 @@ TideSheet reaches 1.0 only when:
 - State restoration across process termination.
 
 A deferred capability enters the roadmap only when a concrete consumer establishes its required ownership and lifecycle contract.
-
-## Unified Presentation API and Navigation Coverage
-
-The single entry in each renderer accepts `SheetPresentation`: `.modal` by default or `.attached`. SwiftUI captures the style per presentation, retaining the original carrier during dismissal and applying changes on the next opening. Example call sites and guides use this entry without compatibility aliases.
-
-The attached SwiftUI carrier belongs to the declaring page while covering its containing navigation area. A local UIKit adapter coordinates the rendering container and navigation visibility; the SwiftUI state, surface, content, environment, measurement, and gestures stay in `TideSheetSwiftUI`. Navigation delegates and application paths remain application-owned.
-
-The final September 7 regression passes 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests on iPhone 17 Pro Max / iOS 26.5. Verification includes declaration from a small control, navigation-bar tap interception, bottom-edge coverage, ordinary and interactive navigation, retained content, nested native presentation, rotation, and style changes between presentations. Portrait and landscape screenshots were inspected. Minimum-version runtime and broader platform adaptation remain open.
