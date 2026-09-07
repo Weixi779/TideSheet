@@ -1,6 +1,6 @@
 # TideSheet Documentation
 
-TideSheet's unified API, initial renderers, and two runnable example apps are implemented. The first tagged release is still pending. Read [Release Readiness](Release-Readiness.md) for the current evidence and remaining delivery work.
+TideSheet's first preview is **0.1.0-beta.1**, covering the unified API, both renderers, and two runnable example apps. Read the [changelog](../CHANGELOG.md) for version history and [Release Readiness](Release-Readiness.md) for the validation evidence and remaining work before broader support.
 
 ## Reading Order
 

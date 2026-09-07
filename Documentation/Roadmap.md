@@ -4,11 +4,11 @@
 >
 > Last updated: September 7, 2026
 
-TideSheet is a pre-1.0, iOS 17+ bottom-sheet library built with Swift 6.2. This roadmap is ordered by dependency rather than date. The order is the current execution plan, not a compatibility promise.
+TideSheet is a pre-1.0, iOS 17+ bottom-sheet library requiring Swift tools 6.2 or later. This roadmap is ordered by dependency rather than date. The order is the current execution plan, not a compatibility promise.
 
 The accepted architectural boundary lives in [Design Decisions](Design-Decisions.md). If implementation evidence challenges that boundary, update the decision explicitly instead of silently changing ownership in code.
 
-The unified API and two example apps are complete. The next phase is first-prerelease validation and delivery, not another required API layer. [Release Readiness](Release-Readiness.md) records the current audit and recommended gates. The native-slice sections below retain milestone-era validation results; the latest aggregate result is 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests, all passing on iOS 26.5.
+The unified API and two example apps ship in the first preview, `0.1.0-beta.1`. The next phase is minimum-runtime validation and repeatable verification. [Release Readiness](Release-Readiness.md) records the completed checks and remaining gaps. The native-slice sections below retain milestone-era validation results; the latest aggregate result is 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests, all passing on iOS 26.5.
 
 ## Direction
 
@@ -218,17 +218,20 @@ For every supported combination, verify:
 
 All eight root/content/context combinations satisfy the declared supported contract without moving ownership into bridged content. Generic bridge API design and arbitrary content support remain later work, with requirements established by real consumers.
 
-## Next — First Prerelease Validation and Delivery
+## Done — First Public Preview
 
-Use the existing public surface and runnable examples to close the [release checklist](Release-Readiness.md#recommended-gates-before-tagging):
+`0.1.0-beta.1` includes both renderer products, the unified API, and two independent example apps. Release preparation adds exact-version installation instructions, a changelog, and explicit support limits. Both examples pass unsigned Release builds for iOS device destinations after a localized Swift compiler compatibility fix.
 
-1. Choose and document the preview support matrix and version stage.
-2. Run minimum-runtime, Release/device-build, and independent remote-consumer checks.
-3. Extend navigation, compact-height, teardown/release, accessibility, and content-owned input-layout validation for the selected matrix.
-4. Add repeatable CI, versioned installation instructions, and release notes with known limits.
-5. Publish and verify the chosen tag and prerelease when authorized.
+## Next — Minimum Runtime and Repeatable Verification
 
-The first implementation slice in that phase should validate minimum-runtime, packaging, and lifecycle behavior. Additional API design is driven by a demonstrated failure or consumer need, not by making the two content-adapter directions look symmetric.
+Use the existing public surface and runnable examples to close the [remaining validation gaps](Release-Readiness.md#remaining-validation-before-broader-support):
+
+1. Run minimum-runtime show/resize/dismiss/navigation checks on iOS 17.
+2. Extend compact-height, teardown/release, accessibility, and content-owned input-layout validation for the selected matrix.
+3. Add repeatable CI covering package tests and both external example Release builds, with focused UI regressions.
+4. Collect feedback from real consumers before extending the declared support matrix or public API.
+
+Additional API design is driven by a demonstrated failure or consumer need, not by making the two content-adapter directions look symmetric.
 
 ## Later — SwiftUI Content Layout and Validation
 
@@ -254,7 +257,7 @@ Validate these against both presentation contexts and preserve one-shot dismissa
 
 ### First release decision
 
-The renderer targets are implemented. The recommendation is a pre-1.0 prerelease of both renderer products and the documented system-adapter recipes, with an explicit validation matrix and known limits. The exact version and support scope remain to be chosen; see [Release Readiness](Release-Readiness.md#recommended-first-release). A first prerelease does not imply complete capability-matrix support or 1.0 stability.
+The first preview is `0.1.0-beta.1`, covering both renderer products and the documented system-adapter recipes. See [Release Readiness](Release-Readiness.md#first-beta-scope-and-packaging) for the validation matrix and known limits. This preview does not imply complete capability-matrix support or 1.0 stability.
 
 ### 1.0 exit condition
 

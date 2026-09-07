@@ -1,10 +1,10 @@
 # TideSheet
 
-TideSheet is an in-progress custom bottom-sheet library designed for UIKit and SwiftUI roots, with modal and host-attached presentation contexts.
+TideSheet is a custom bottom-sheet library designed for UIKit and SwiftUI roots, with modal and host-attached presentation contexts.
 
-> TideSheet is under active development. Its public API may change before 1.0.
+> Current preview: **0.1.0-beta.1**. TideSheet is under active development; its public API may change before 1.0.
 
-The unified presentation API, initial UIKit and SwiftUI renderers, and both runnable example apps are implemented. System content-bridge examples are included for both directions. The next phase is first-prerelease validation and delivery; see [Release Readiness](Documentation/Release-Readiness.md). No version tag has been published yet.
+The first beta includes the unified presentation API, UIKit and SwiftUI renderers, and two runnable example apps. System content-bridge examples are included for both directions. See the [release notes](https://github.com/Weixi779/TideSheet/releases/tag/v0.1.0-beta.1), [changelog](CHANGELOG.md), and [validation record and known gaps](Documentation/Release-Readiness.md).
 
 Content owns safe-area usage, keyboard layout, and scrolling. TideSheet does not add a content inset policy, automatic keyboard avoidance, or scroll-view gesture handoff.
 
@@ -13,6 +13,27 @@ Content owns safe-area usage, keyboard layout, and scrolling. TideSheet does not
 - iOS 17 or later
 - Xcode 26 or later
 - Swift 6.2 or later
+
+This beta was validated with Xcode 26.6 / Swift 6.3.3 on iPhone 17 Pro Max / iOS 26.5. Both examples also pass unsigned Release builds for an iOS device destination with an iOS 17 deployment target. iOS 17 runtime behavior, physical devices, iPad, and multi-scene configurations remain unverified.
+
+## Installation
+
+In Xcode, add `https://github.com/Weixi779/TideSheet.git` as a package dependency and choose **Exact Version: 0.1.0-beta.1**. Select the renderer product for your application's root framework.
+
+In a Swift package, pin the preview explicitly:
+
+```swift
+.package(url: "https://github.com/Weixi779/TideSheet.git", exact: "0.1.0-beta.1")
+```
+
+Add one renderer to your target dependencies:
+
+```swift
+.product(name: "TideSheetSwiftUI", package: "TideSheet")
+// Or: .product(name: "TideSheetUIKit", package: "TideSheet")
+```
+
+Each product includes the shared module. Keep the explicit imports shown below.
 
 ## Modules
 
