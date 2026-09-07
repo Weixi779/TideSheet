@@ -92,6 +92,10 @@ private final class SheetAttachmentController<Content: View>: UIViewController {
         fatalError("init(coder:) has not been implemented")
     }
 
+    /// Explicit teardown happens in dismantleUIViewController. Avoid the
+    /// synthesized generic isolated-deinit optimizer crash (swift#90625).
+    nonisolated deinit {}
+
     override func loadView() {
         view = UIView()
         view.backgroundColor = .clear

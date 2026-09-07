@@ -35,6 +35,7 @@ struct SheetPresentationInput<Item: Identifiable> {
     }
 }
 
+@MainActor
 @Observable
 final class SheetPresentationState<Item: Identifiable> {
     @Observable
@@ -59,6 +60,10 @@ final class SheetPresentationState<Item: Identifiable> {
             lastValidSelection = input.selection.value
         }
 
+        /// Avoid an implicitly isolated generic deinit on back-deployed runtimes.
+        /// Swift compiler issue: https://github.com/swiftlang/swift/issues/90625
+        nonisolated deinit {}
+
         var selectedDetent: TideSheetDetent.Id {
             if let closingSelection { return closingSelection }
             switch input.selection {
@@ -78,6 +83,9 @@ final class SheetPresentationState<Item: Identifiable> {
     private(set) var presentation: Presentation?
     @ObservationIgnored private var input: SheetPresentationInput<Item>?
 
+    /// Keep the host-release callback on MainActor while working around the
+    /// generic isolated-deinit optimizer crash in Swift 6.2/6.3 (swift#90625).
+    @_optimize(none)
     isolated deinit {
         presentation?.input.onDismiss?()
     }

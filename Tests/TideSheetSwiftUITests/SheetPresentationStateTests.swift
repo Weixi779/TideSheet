@@ -28,6 +28,9 @@ struct SheetPresentationStateTests {
             self.value = value
         }
 
+        /// Match the generic deinit workaround used by the renderer for Release tests.
+        nonisolated deinit {}
+
         var binding: Binding<Value> {
             Binding(get: { self.value }, set: { self.value = $0; self.writes += 1 })
         }
