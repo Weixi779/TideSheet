@@ -2,7 +2,7 @@
 
 > Status: Living baseline
 >
-> Last updated: September 6, 2026
+> Last updated: September 7, 2026
 
 This document records decisions that define TideSheet's direction. It describes accepted boundaries, not implementation order or current feature availability. See the [roadmap](Roadmap.md) for delivery status.
 
@@ -92,6 +92,8 @@ A UIKit root does not switch to the SwiftUI renderer merely because its sheet co
 
 Foreign content is adapted at the selected renderer boundary. A bridge must not duplicate the sheet engine or move presentation ownership into the content framework. The exact public bridge APIs remain open.
 
+The [system-bridge experiments](Cross-Content-Bridges.md) exercise this boundary through runnable examples. Their application-specific adapters are evidence for the open API discussion, not additional accepted public abstractions.
+
 ### 5. Each Root Keeps Its Native Presentation Model
 
 The renderers share domain semantics, but they do not share a single presentation implementation.
@@ -105,8 +107,8 @@ For a UIKit root:
 For a SwiftUI root:
 
 - SwiftUI content remains a native `View`;
-- attached presentation is native SwiftUI composition, such as an overlay owned by the chosen host;
-- UIKit containment and `UIViewController` presentation are not imposed on the native SwiftUI path;
+- attached state and sheet rendering remain SwiftUI, with a local UIKit carrier adapter for coverage above navigation chrome and page transition notifications;
+- the adapter keeps the declaration's environment and retained content, does not invoke `TideSheetUIKit`, and does not create a modal presentation;
 - UIKit content is adapted at the SwiftUI renderer boundary.
 
 The goal is shared, documented semantics with framework-native mechanics—not identical internal code or pixel-for-pixel execution.
@@ -117,12 +119,11 @@ Modal and attached are presentation contexts, not separate detent engines.
 
 A modal sheet establishes an independent presentation scope. It is presented and dismissed as its own presentation rather than belonging to the underlying route's view hierarchy.
 
-An attached sheet is composed into an explicit host hierarchy and shares that host's ownership. Its effective scope is determined by where the application installs it:
+An attached sheet belongs to its declaring page. Navigation away from that page hides the sheet without ending its presentation; returning restores the same content and selection. Its drawing bounds may include the enclosing navigation chrome, independently of the size of the declaration site.
 
-- installing it on route content can make it route-scoped;
-- installing it on a navigation or application root can make it root-scoped.
+Both renderers expose one entry with a shared `SheetPresentation` value: `.modal` (default) or `.attached`. The selected relationship is captured when opening. SwiftUI style changes while open apply to the next presentation.
 
-TideSheet does not infer that scope from a Router or navigation stack. Both contexts reuse the same public configuration and domain semantics where their host frameworks allow it.
+The SwiftUI adapter resolves only the declaring page's local containment chain. This revises the initial local-overlay implementation: complete navigation-bar coverage requires a container above page content. It does not select a global presenter, observe application routes, or replace a navigation delegate. UIKit callers continue to supply their owning controller explicitly.
 
 ### 7. Presentation Ownership Stays Outside the Shared Domain
 
@@ -181,7 +182,7 @@ This freedom permits deliberate API correction. It does not justify ambiguous ow
 
 ### 11. SwiftUI Presentation and Selection
 
-The native SwiftUI entry points are `attachedSheet` for composition inside an explicit host and `bottomSheet` for independent modal presentation. Both have separate `isPresented: Binding<Bool>` and `item: Binding<Item?>` overloads. Item content requires `Identifiable`, without an additional `Equatable` requirement.
+The SwiftUI entry is `bottomSheet(presentation:)`, with `.modal` as the default and `.attached` for page ownership. It has separate `isPresented: Binding<Bool>` and `item: Binding<Item?>` overloads. Item content requires `Identifiable`, without an additional `Equatable` requirement.
 
 Detents are configured as a `Set<TideSheetDetent>`. IDs must still be unique: value equality in a set does not enforce identifier uniqueness. Physical drag order is resolved from measured heights; set iteration order has no presentation meaning.
 
@@ -194,7 +195,7 @@ Ordinary content updates, layout changes, and navigation away and back do not re
 
 Sheet content uses the custom `@Environment(\.sheet)` value to call `dismiss()` or `selectDetent(_:)`. Actions belong to one presentation and become inert when it ends. They do not control navigation or locate another presenter. Native SwiftUI content measurement does not require a public invalidation action.
 
-Both contexts reuse one SwiftUI presentation state and surface. The initial modal implementation uses `fullScreenCover` with a transparent presentation background as its native carrier. TideSheet owns the surface, detents, drag interaction, backdrop, and surface animation. The carrier choice is internal; there is no public UIKit presenter or carrier configuration.
+Both contexts reuse one SwiftUI presentation state and surface. Attached rendering uses a retained `UIHostingController` beside the enclosing SwiftUI hosting view, constrained to the navigation area, anchored to the declaring page with `UIViewControllerRepresentable`. The declaration's environment is forwarded to its content. The initial modal implementation uses `fullScreenCover` with a transparent presentation background as its native carrier. TideSheet owns the surface, detents, drag interaction, backdrop, and surface animation. The carrier choice is internal; there is no public UIKit presenter or carrier configuration.
 
 Ordinary modal dismissal closes the custom surface, removes the carrier, and then invokes `onDismiss` once. A replacement item waits for that sequence. Application navigation belongs in application code; pushing the underlying stack does not bring that route above an active modal.
 
@@ -214,7 +215,7 @@ These are intentional ownership boundaries carried over from the existing projec
 
 ### 13. Initial UIKit Interface
 
-UIKit owners use `presentBottomSheet` or `attachBottomSheet` with a native `UIViewController` and an immutable `BottomSheetConfiguration`. Configuration carries the shared detent set and initial ID alongside UIKit-specific appearance and dismissal options. Content, fixed, fractional, and maximum policies all use the same shared resolver; the old application's separate fixed/content and medium/large domain types are not reproduced.
+UIKit owners use `presentBottomSheet(presentation:)` with a native `UIViewController` and an immutable `BottomSheetConfiguration`. Configuration carries the shared detent set and initial ID alongside UIKit-specific appearance and dismissal options. Content, fixed, fractional, and maximum policies all use the same shared resolver; the old application's separate fixed/content and medium/large domain types are not reproduced.
 
 `BottomSheetHandler` weakly controls dismissal, content-size invalidation, and detent selection. It exposes the current selected ID and a settled-selection callback. Presentation completion, one-shot `onDismiss`, and an explicit dismissal completion describe different lifecycle events. The surface, presentation controller, attachment controller, and transition remain internal.
 

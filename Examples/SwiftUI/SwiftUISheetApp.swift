@@ -1,5 +1,5 @@
 //
-//  AttachedSheetApp.swift
+//  SwiftUISheetApp.swift
 //  TideSheet
 //
 //  Created by weixi on 2026/9/6.
@@ -10,7 +10,7 @@ import TideSheet
 import TideSheetSwiftUI
 
 @main
-struct AttachedSheetApp: App {
+struct SwiftUISheetApp: App {
     var body: some Scene {
         WindowGroup { SheetCatalog() }
     }
@@ -18,10 +18,15 @@ struct AttachedSheetApp: App {
 
 private struct SheetCatalog: View {
     @State private var path: [String] = []
+    @State private var endedSheets = 0
 
     var body: some View {
         NavigationStack(path: $path) {
             List {
+                Section("Presentation") {
+                    NavigationLink("Choose presentation", value: "presentation")
+                    Text("Ended sheets: \(endedSheets)")
+                }
                 Section("Attached") {
                     NavigationLink("Internal selection", value: "internal")
                     NavigationLink("External selection", value: "external")
@@ -34,14 +39,22 @@ private struct SheetCatalog: View {
                     NavigationLink("Modal item and initial selection", value: "modalItemInitial")
                     NavigationLink("Modal item and external selection", value: "modalItemExternal")
                 }
+                Section("UIKit content") {
+                    NavigationLink("UIKit content · Attached", value: "uikitAttached")
+                    NavigationLink("UIKit content · Modal", value: "uikitModal")
+                }
             }
             .navigationTitle("TideSheet")
             .navigationDestination(for: String.self) { mode in
-                if mode == "detail" {
+                if mode == "presentation" {
+                    PresentationExample(onNavigate: { path.append("detail") }, onEnded: { endedSheets += 1 })
+                } else if mode == "detail" {
                     Text("An independent route")
                         .frame(maxWidth: .infinity, maxHeight: .infinity)
                         .background(.background)
                         .navigationTitle("Next page")
+                } else if mode.hasPrefix("uikit") {
+                    UIKitContentExample(isAttached: mode == "uikitAttached", onNavigate: { path.append("detail") })
                 } else if mode.hasPrefix("modal") {
                     ModalSheetExample(mode: mode, onNavigate: { path.append("detail") })
                 } else {
@@ -104,19 +117,19 @@ private struct AttachedSheetExample: View {
     private var attachment: some View {
         switch mode {
         case "external":
-            host.attachedSheet(isPresented: $isPresented, detents: ExampleDetents.all, selectedDetent: $selection, onDismiss: didDismiss) {
+            host.bottomSheet(isPresented: $isPresented, presentation: .attached, detents: ExampleDetents.all, selectedDetent: $selection, onDismiss: didDismiss) {
                 sheetContent(title: "External selection")
             }
         case "itemInitial":
-            host.attachedSheet(item: $item, detents: ExampleDetents.all, initialDetent: ExampleDetents.compact.id, onDismiss: didDismiss) {
+            host.bottomSheet(item: $item, presentation: .attached, detents: ExampleDetents.all, initialDetent: ExampleDetents.compact.id, onDismiss: didDismiss) {
                 sheetContent(title: $0.title)
             }
         case "itemExternal":
-            host.attachedSheet(item: $item, detents: ExampleDetents.all, selectedDetent: $selection, onDismiss: didDismiss) {
+            host.bottomSheet(item: $item, presentation: .attached, detents: ExampleDetents.all, selectedDetent: $selection, onDismiss: didDismiss) {
                 sheetContent(title: $0.title)
             }
         default:
-            host.attachedSheet(isPresented: $isPresented, detents: ExampleDetents.all, initialDetent: ExampleDetents.compact.id, onDismiss: didDismiss) {
+            host.bottomSheet(isPresented: $isPresented, presentation: .attached, detents: ExampleDetents.all, initialDetent: ExampleDetents.compact.id, onDismiss: didDismiss) {
                 sheetContent(title: "Internal selection")
             }
         }
@@ -166,7 +179,7 @@ private struct ExampleSheetContent: View {
             Button("Count \(count)") { count += 1 }
             HStack {
                 Button("Resize content") { moreContent.toggle() }
-                Button("Resize host") { compactHost.toggle() }
+                Button("Resize source") { compactHost.toggle() }
             }
             if moreContent {
                 Text("Extra content changes the fitting height automatically.")
@@ -322,5 +335,69 @@ private struct ModalExampleContent: View {
         .padding(.horizontal, 20)
         .padding(.bottom, 20)
         .buttonStyle(.bordered)
+    }
+}
+
+private struct PresentationExample: View {
+    let onNavigate: () -> Void
+    let onEnded: () -> Void
+    @State private var isPresented = false
+    @State private var presentation: SheetPresentation = .attached
+    @State private var dismissals = 0
+
+    var body: some View {
+        VStack(spacing: 20) {
+            Text("Dismissals: \(dismissals)")
+            Text("Next: \(presentation == .attached ? "attached" : "modal")")
+            Button("Open chosen sheet") { isPresented = true }
+                .buttonStyle(.borderedProminent)
+                .bottomSheet(
+                    isPresented: $isPresented,
+                    presentation: presentation,
+                    detents: ExampleDetents.all,
+                    initialDetent: ExampleDetents.compact.id,
+                    onDismiss: { dismissals += 1; onEnded() },
+                ) {
+                    PresentationContent(presentation: $presentation, onNavigate: onNavigate)
+                }
+            Spacer()
+        }
+        .padding()
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .background(.blue.opacity(0.06))
+        .navigationTitle("Presentation")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+}
+
+private struct PresentationContent: View {
+    @Binding var presentation: SheetPresentation
+    let onNavigate: () -> Void
+    @Environment(\.sheet) private var sheet
+    @Environment(\.dismiss) private var dismissPage
+    @State private var count = 0
+    @State private var showsNativeSheet = false
+
+    var body: some View {
+        VStack(spacing: 14) {
+            Text("One API, two relationships").font(.headline)
+            Button("Count \(count)") { count += 1 }
+            Button("Maximum") { sheet.selectDetent(ExampleDetents.maximum.id) }
+            Button("Change next presentation") {
+                presentation = presentation == .attached ? .modal : .attached
+            }
+            Text("Next: \(presentation == .attached ? "attached" : "modal")")
+            Button("Push next page", action: onNavigate)
+            HStack {
+                Button("Leave declaring page") { dismissPage() }
+                Button("Native sheet") { showsNativeSheet = true }
+            }
+            Button("Close chosen sheet") { sheet.dismiss() }
+        }
+        .padding()
+        .buttonStyle(.bordered)
+        .sheet(isPresented: $showsNativeSheet) {
+            Button("Close native sheet") { showsNativeSheet = false }
+        }
     }
 }

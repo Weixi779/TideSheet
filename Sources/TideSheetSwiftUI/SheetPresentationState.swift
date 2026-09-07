@@ -26,6 +26,7 @@ struct SheetPresentationInput<Item: Identifiable> {
     let detents: Set<TideSheetDetent>
     let selection: SheetSelection
     let onDismiss: (() -> Void)?
+    var style: SheetPresentation = .modal
 
     func validate() {
         // Resolve with zero available space to validate declarations without measuring content.
@@ -39,6 +40,7 @@ final class SheetPresentationState<Item: Identifiable> {
     @Observable
     final class Presentation: Identifiable {
         let id = UUID()
+        let style: SheetPresentation
         var isDismissing = false
         var internalSelection: TideSheetDetent.Id
 
@@ -50,6 +52,7 @@ final class SheetPresentationState<Item: Identifiable> {
         @ObservationIgnored private var closingSelection: TideSheetDetent.Id?
 
         init(item: Item, input: SheetPresentationInput<Item>) {
+            style = input.style
             self.item = item
             self.input = input
             internalSelection = input.selection.value

@@ -36,6 +36,8 @@ private enum Mode: String, CaseIterable {
     case scrolling = "Scrolling content"
     case immediateModal = "Immediate modal dismissal"
     case immediateAttached = "Immediate attached dismissal"
+    case swiftUIModal = "SwiftUI content · Modal"
+    case swiftUIAttached = "SwiftUI content · Attached"
 
     var isAttached: Bool {
         self == .attached || self == .immediateAttached
@@ -67,7 +69,13 @@ private final class Catalog: UITableViewController {
     }
 
     override func tableView(_: UITableView, didSelectRowAt indexPath: IndexPath) {
-        navigationController?.pushViewController(Host(mode: Mode.allCases[indexPath.row]), animated: true)
+        let mode = Mode.allCases[indexPath.row]
+        let controller: UIViewController = switch mode {
+        case .swiftUIModal: SwiftUIContentExample(isAttached: false)
+        case .swiftUIAttached: SwiftUIContentExample(isAttached: true)
+        default: Host(mode: mode)
+        }
+        navigationController?.pushViewController(controller, animated: true)
     }
 }
 
@@ -134,9 +142,8 @@ private final class Host: UIViewController {
             dismissals += 1
             updateStatus()
         }
-        let handler = mode.isAttached
-            ? attachBottomSheet(content, configuration: configuration, onDismiss: onDismiss)
-            : presentBottomSheet(content, configuration: configuration, onDismiss: onDismiss)
+        let handler = presentBottomSheet(content, presentation: mode.isAttached ? .attached : .modal,
+                                         configuration: configuration, onDismiss: onDismiss)
         if let content = content as? SheetContent {
             content.handler = handler
             content.onNavigate = { [weak self] in self?.pushDetail() }

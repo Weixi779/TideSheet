@@ -1,31 +1,11 @@
 //
-//  UIViewController+AttachedBottomSheet.swift
+//  UIViewController+SheetAttachment.swift
 //  TideSheet
 //
 //  Created by weixi on 2026/9/6.
 //
 
 import UIKit
-
-@MainActor
-public extension UIViewController {
-    /// 将 bottom sheet 附着到当前页面；push 时随宿主离屏，pop 后保留原有状态。
-    @discardableResult
-    func attachBottomSheet(
-        _ contentViewController: UIViewController,
-        configuration: BottomSheetConfiguration,
-        animated: Bool = true,
-        onDismiss: (() -> Void)? = nil,
-        completion: (() -> Void)? = nil,
-    ) -> BottomSheetHandler {
-        let sheet = BottomSheetViewController(
-            contentViewController: contentViewController,
-            configuration: configuration,
-            onDismiss: onDismiss,
-        )
-        return attachBottomSheetViewController(sheet, animated: animated, completion: completion)
-    }
-}
 
 @MainActor
 extension UIViewController {

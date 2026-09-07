@@ -10,9 +10,9 @@ import SwiftUI
 
 struct ModalSheetHost<Item: Identifiable, SheetContent: View>: View {
     let input: SheetPresentationInput<Item>
+    let state: SheetPresentationState<Item>
     let sheetContent: (Item) -> SheetContent
 
-    @State private var state = SheetPresentationState<Item>()
     @State private var carrier: SheetPresentationState<Item>.Presentation?
     @State private var activeCarrierID: UUID?
 
@@ -37,6 +37,10 @@ struct ModalSheetHost<Item: Identifiable, SheetContent: View>: View {
                     .offset(x: -safeArea.leading, y: -safeArea.top)
                     .id(presentation.id)
                 }
+                // The presenting route can leave the visible navigation path while
+                // this carrier remains onscreen. Keep its input reconciliation alive
+                // in the presented tree as well as at the original modifier site.
+                .onReceive(Just((input.item.wrappedValue, input.selection.value))) { _ in state.update(input) }
                 .presentationBackground(.clear)
                 .interactiveDismissDisabled()
                 // Only the native carrier opens/closes without animation. The
@@ -45,13 +49,7 @@ struct ModalSheetHost<Item: Identifiable, SheetContent: View>: View {
             }
             .onReceive(Just((input.item.wrappedValue, input.selection.value))) { _ in state.update(input) }
             .onChange(of: state.presentation?.id, initial: true) { _, _ in
-                guard activeCarrierID == nil, let presentation = state.presentation else { return }
-                guard !presentation.isDismissing else {
-                    state.finishDismissal(presentation.id)
-                    return
-                }
-                activeCarrierID = presentation.id
-                withoutCarrierAnimation { carrier = presentation }
+                presentPendingCarrierIfNeeded()
             }
     }
 
@@ -78,6 +76,19 @@ struct ModalSheetHost<Item: Identifiable, SheetContent: View>: View {
         state.update(input)
         state.dismiss(id)
         state.finishDismissal(id)
+        // An offscreen modifier does not run its onChange observer. A replacement
+        // must advance from native dismissal completion, which remains active.
+        presentPendingCarrierIfNeeded()
+    }
+
+    private func presentPendingCarrierIfNeeded() {
+        guard activeCarrierID == nil, let presentation = state.presentation else { return }
+        guard !presentation.isDismissing else {
+            state.finishDismissal(presentation.id)
+            return
+        }
+        activeCarrierID = presentation.id
+        withoutCarrierAnimation { carrier = presentation }
     }
 
     private func withoutCarrierAnimation(_ action: () -> Void) {

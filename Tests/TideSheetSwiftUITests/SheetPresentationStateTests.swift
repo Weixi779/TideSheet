@@ -34,6 +34,30 @@ struct SheetPresentationStateTests {
     }
 
     @Test
+    func `Presentation style changes apply to the next presentation`() throws {
+        let item = Storage<Item?>(Item(id: 1))
+        let state = SheetPresentationState<Item>()
+        var input = input(item)
+        input.style = .attached
+        state.update(input)
+        let original = try #require(state.presentation)
+        state.actions(for: original.id).selectDetent(expanded.id)
+
+        input.style = .modal
+        state.update(input)
+        #expect(state.presentation === original)
+        #expect(original.style == .attached)
+        #expect(original.selectedDetent == expanded.id)
+
+        item.value = Item(id: 2)
+        state.update(input)
+        #expect(original.isDismissing)
+        state.finishDismissal(original.id)
+        #expect(state.presentation?.style == .modal)
+        #expect(state.presentation?.item.id == 2)
+    }
+
+    @Test
     func `Updates content without resetting internal selection`() throws {
         let item = Storage<Item?>(Item(id: 1))
         let state = SheetPresentationState<Item>()

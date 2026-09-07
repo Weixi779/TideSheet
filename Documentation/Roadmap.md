@@ -2,7 +2,7 @@
 
 > Status: Working plan
 >
-> Last updated: September 6, 2026
+> Last updated: September 7, 2026
 
 TideSheet is a pre-1.0, iOS 17+ bottom-sheet library built with Swift 6.2. This roadmap is ordered by dependency rather than date. The order is the current execution plan, not a compatibility promise.
 
@@ -60,9 +60,9 @@ Prove the shared model through a native SwiftUI implementation whose lifetime be
 
 ### Deliverables
 
-- `attachedSheet` overloads for Boolean/item presentation and internal/external selection.
+- `bottomSheet(presentation: .attached, ...)` overloads for Boolean/item presentation and internal/external selection.
 - A `Set` of detents with an explicit initial ID or selected-ID binding.
-- A host-attached overlay implemented entirely inside `TideSheetSwiftUI`.
+- A page-owned SwiftUI surface with local container integration inside `TideSheetSwiftUI`.
 - Native SwiftUI content only.
 - Programmatic show and dismiss.
 - A minimal dimming layer, rounded sheet surface, and drag indicator.
@@ -78,7 +78,7 @@ SwiftUI owns the view tree, geometry, animation, gesture state, and presentation
 ### Validation
 
 - Core and renderer unit tests cover height resolution, coalesced identities, selection ownership, item updates/replacement, stale actions, one-shot dismissal, reentrant callbacks, and host-state release.
-- The [package-external SwiftUI example](../Examples/AttachedSheet/README.md) uses only the `TideSheetSwiftUI` product and explicit imports.
+- The [package-external SwiftUI example](../Examples/SwiftUI/README.md) uses only the `TideSheetSwiftUI` product and explicit imports.
 - UI tests on iPhone 17 Pro Max / iOS 26.5 exercise all four overloads, height-policy selection, external binding writes, repeated show/dismiss, content and host resizing, dragging, interactive dismissal, item updates, and navigation away/back with retained state.
 - Builds use the iOS 17 deployment target. Runtime checks on iOS 17, gesture interruption during an active drag, root-versus-route comparison, and the full accessibility/adaptation matrix remain follow-up validation.
 
@@ -101,7 +101,7 @@ A pure SwiftUI application can attach, resize, drag, select, and dismiss a Swift
 
 ### Deliverables
 
-- `bottomSheet` overloads with the same Boolean/item presentation and internal/external selection choices as `attachedSheet`.
+- `bottomSheet` overloads with the same Boolean/item presentation and internal/external selection choices as the `.attached` style.
 - A SwiftUI `fullScreenCover` carrier with a transparent background and independent presentation scope.
 - Reuse of the attached implementation's state, content identity, detent resolution, surface, and indicator interaction.
 - TideSheet-owned surface animation, with the carrier opening and closing without an additional transition for ordinary TideSheet actions.
@@ -129,7 +129,7 @@ Implement the accepted domain semantics with UIKit-native presentation and conta
 
 - One internal UIKit-owned sheet surface and interaction implementation.
 - `presentBottomSheet` through a custom presentation controller and transition.
-- `attachBottomSheet` through explicit host-owned child-controller containment.
+- `presentBottomSheet(presentation: .attached, ...)` through explicit host-owned child-controller containment.
 - Native UIKit content only.
 - Immutable `BottomSheetConfiguration` using the shared detent set and an explicit initial ID.
 - A weak `BottomSheetHandler` for selection, settled-selection observation, content-size invalidation, and dismissal completion.
@@ -175,6 +175,16 @@ Allow the root to keep presentation ownership regardless of content technology.
 
 The exact public APIs should be accepted only after both bridge samples establish whether they require a `UIView`, `UIViewController`, SwiftUI builder, or another renderer-specific boundary.
 
+### Initial system-bridge examples
+
+- The UIKit example hosts SwiftUI through `UIHostingController`, using the existing UIKit entry points and handler. Its intrinsic body reports measured height at the actual width through `preferredContentSize`.
+- The SwiftUI example hosts a controller through `UIViewControllerRepresentable`, using the existing SwiftUI entry points and environment actions. The concrete controller's preferred-height changes update an explicit SwiftUI content frame.
+- Each example still depends on only its root renderer product. No new public bridge wrapper, module, or renderer-to-renderer dependency has been added.
+- Focused UI scenarios cover both directions in both contexts, including height changes, content updates, navigation retention, dismissal, and reopening. The SwiftUI-root scenarios also exercise item replacement.
+- September 7 validation passes: 34 package unit tests, the full 12-test SwiftUI example suite, and 2 UIKit bridge UI tests. Bridge testing also fixed modal item reconciliation and replacement after the presenting SwiftUI route moves offscreen; native SwiftUI content now has regression coverage for that same sequence.
+
+See [Cross-Content Bridge Experiments](Cross-Content-Bridges.md) for the sizing contracts, validation evidence, and remaining API questions. These examples are the evidence-gathering portion of this milestone; they do not establish a generic bridge API or complete capability-matrix support.
+
 ### Capability matrix
 
 Each root, content, and context combination must work while the root renderer remains the sole presentation owner:
@@ -182,9 +192,9 @@ Each root, content, and context combination must work while the root renderer re
 | Root renderer | Content | Attached | Modal |
 | --- | --- | --- | --- |
 | SwiftUI | SwiftUI | Initial slice | Initial slice |
-| SwiftUI | UIKit | Planned | Planned |
+| SwiftUI | UIKit | System-adapter example | System-adapter example |
 | UIKit | UIKit | Initial slice | Initial slice |
-| UIKit | SwiftUI | Planned | Planned |
+| UIKit | SwiftUI | System-adapter example | System-adapter example |
 
 For every supported combination, verify:
 
@@ -252,3 +262,11 @@ TideSheet reaches 1.0 only when:
 - State restoration across process termination.
 
 A deferred capability enters the roadmap only when a concrete consumer establishes its required ownership and lifecycle contract.
+
+## Unified Presentation API and Navigation Coverage
+
+The single entry in each renderer accepts `SheetPresentation`: `.modal` by default or `.attached`. SwiftUI captures the style per presentation, retaining the original carrier during dismissal and applying changes on the next opening. Example call sites and guides use this entry without compatibility aliases.
+
+The attached SwiftUI carrier belongs to the declaring page while covering its containing navigation area. A local UIKit adapter coordinates the rendering container and navigation visibility; the SwiftUI state, surface, content, environment, measurement, and gestures stay in `TideSheetSwiftUI`. Navigation delegates and application paths remain application-owned.
+
+The final September 7 regression passes 35 package unit tests, 18 SwiftUI UI tests, and 12 UIKit UI tests on iPhone 17 Pro Max / iOS 26.5. Verification includes declaration from a small control, navigation-bar tap interception, bottom-edge coverage, ordinary and interactive navigation, retained content, nested native presentation, rotation, and style changes between presentations. Portrait and landscape screenshots were inspected. Minimum-version runtime and broader platform adaptation remain open.

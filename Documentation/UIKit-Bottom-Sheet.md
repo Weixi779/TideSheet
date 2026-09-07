@@ -23,9 +23,9 @@ let handler = presentBottomSheet(
 )
 ```
 
-Call these methods on the owning `UIViewController`. Use `attachBottomSheet` with the same arguments when the sheet should belong to that controller's view hierarchy. The content controller must not already have a parent or presenter. Present and attach from a stable, visible host; TideSheet does not choose a global presenter or repair invalid UIKit presentation requests.
+Call `presentBottomSheet` on the owning `UIViewController`. Its `presentation: SheetPresentation` parameter defaults to `.modal`; use `.attached` when the sheet should belong to that controller's view hierarchy. The content controller must not already have a parent or presenter. Present and attach from a stable, visible host; TideSheet does not choose a global presenter or repair invalid UIKit presentation requests.
 
-Both entries accept `animated`, an optional `onDismiss`, and an optional presentation `completion`. The completion means entry has finished; it does not mean the sheet has closed. The returned handler can be retained by application content without retaining the sheet.
+The entry accepts `animated`, an optional `onDismiss`, and an optional presentation `completion`. The completion means entry has finished; it does not mean the sheet has closed. The returned handler can be retained by application content without retaining the sheet.
 
 ## Controls and selection
 
@@ -80,8 +80,8 @@ As in the existing project contract, an already-offscreen host removed by an arb
 
 ## Verification and remaining scope
 
-The [standalone UIKit example](../Examples/UIKit/README.md) uses only the `TideSheetUIKit` product. All 34 package unit tests pass, including 11 UIKit tests covering measurement, shared detent resolution, coalesced identities, weak handles, one-shot notification, containment, appearance, and custom backdrop ownership.
+The [standalone UIKit example](../Examples/UIKit/README.md) uses only the `TideSheetUIKit` product. All 35 package unit tests pass, including 11 UIKit tests covering measurement, shared detent resolution, coalesced identities, weak handles, one-shot notification, containment, appearance, and custom backdrop ownership.
 
-All 10 UIKit UI tests pass on iPhone 17 Pro Max / iOS 26.5. They cover modal and attached navigation, returning to attached content from a native modal, dynamic preferred-size updates, repeated dismissal, immediate dismissal during entry, descendant modal closure, native content keyboard layout, and scrolling without sheet resizing. The deployment target is iOS 17. Minimum-version runtime, rotation, iPad, full accessibility, and arbitrary navigation cancellation/removal remain follow-up validation.
+All 12 UIKit UI tests pass on iPhone 17 Pro Max / iOS 26.5. They cover the unified `presentation` parameter, both SwiftUI-content bridge scenarios, modal and attached navigation, returning to attached content from a native modal, dynamic preferred-size updates, repeated dismissal, immediate dismissal during entry, descendant modal closure, native content keyboard layout, and scrolling without sheet resizing. The deployment target is iOS 17. Minimum-version runtime, rotation, iPad, full accessibility, and arbitrary navigation cancellation/removal remain follow-up validation.
 
-This initial slice accepts native UIKit content. Dedicated content bridges are the next milestone. No tagged release or complete capability-matrix support is implied.
+This initial slice accepts native UIKit content. A [system-adapter example](Cross-Content-Bridges.md) also hosts SwiftUI through `UIHostingController` using these same entry points; dedicated bridge conveniences remain open. No tagged release or complete capability-matrix support is implied.

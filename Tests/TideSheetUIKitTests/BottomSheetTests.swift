@@ -160,7 +160,7 @@ struct BottomSheetTests {
         host.view.frame = bounds
         let content = AppearanceContent()
         var dismissals = 0
-        let handler = host.attachBottomSheet(content, configuration: .init(detents: [compact, maximum], initialDetent: compact.id), animated: false) {
+        let handler = host.presentBottomSheet(content, presentation: .attached, configuration: .init(detents: [compact, maximum], initialDetent: compact.id), animated: false) {
             #expect(host.children.isEmpty)
             dismissals += 1
         }
@@ -185,7 +185,7 @@ struct BottomSheetTests {
         let host = UIViewController()
         host.view.frame = bounds
         if attached {
-            let handler = host.attachBottomSheet(UIViewController(), configuration: configuration, animated: false)
+            let handler = host.presentBottomSheet(UIViewController(), presentation: .attached, configuration: configuration, animated: false)
             let attachment = try #require(host.children.first as? BottomSheetAttachmentViewController)
             attachment.setDimmingProgress(0.2)
             #expect(abs(custom.alpha - 0.7) < 0.0001)

@@ -1,5 +1,7 @@
 // !$*UTF8*$!
 { archiveVersion = 1; classes = {}; objectVersion = 60; objects = {
+000000000000000000000020 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SwiftUIContentExample.swift; sourceTree = "<group>"; };
+000000000000000000000021 = { isa = PBXBuildFile; fileRef = 000000000000000000000020; };
 000000000000000000000001 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIKitSheetApp.swift; sourceTree = "<group>"; };
 000000000000000000000002 = { isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UITests/UIKitSheetUITests.swift; sourceTree = "<group>"; };
 000000000000000000000003 = { isa = PBXFileReference; explicitFileType = wrapper.application; path = UIKitSheetExample.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -10,8 +12,8 @@
 000000000000000000000008 = { isa = XCSwiftPackageProductDependency; package = 000000000000000000000007; productName = TideSheetUIKit; };
 000000000000000000000009 = { isa = PBXBuildFile; productRef = 000000000000000000000008; };
 00000000000000000000000A = { isa = PBXGroup; children = (000000000000000000000003, 000000000000000000000004); name = Products; sourceTree = "<group>"; };
-00000000000000000000000B = { isa = PBXGroup; children = (000000000000000000000001, 000000000000000000000002, 00000000000000000000000A); sourceTree = "<group>"; };
-00000000000000000000000C = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000005); runOnlyForDeploymentPostprocessing = 0; };
+00000000000000000000000B = { isa = PBXGroup; children = (000000000000000000000020, 000000000000000000000001, 000000000000000000000002, 00000000000000000000000A); sourceTree = "<group>"; };
+00000000000000000000000C = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000005, 000000000000000000000021); runOnlyForDeploymentPostprocessing = 0; };
 00000000000000000000000D = { isa = PBXSourcesBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000006); runOnlyForDeploymentPostprocessing = 0; };
 00000000000000000000000E = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (000000000000000000000009); runOnlyForDeploymentPostprocessing = 0; };
 00000000000000000000000F = { isa = PBXFrameworksBuildPhase; buildActionMask = 2147483647; files = (); runOnlyForDeploymentPostprocessing = 0; };

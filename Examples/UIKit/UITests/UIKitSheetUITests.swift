@@ -9,6 +9,61 @@ import XCTest
 
 final nonisolated class UIKitSheetUITests: XCTestCase {
     @MainActor
+    func testSwiftUIContentInUIKitModal() {
+        exerciseHostedContent(isAttached: false)
+    }
+
+    @MainActor
+    func testSwiftUIContentInUIKitAttachment() {
+        exerciseHostedContent(isAttached: true)
+    }
+
+    @MainActor
+    private func exerciseHostedContent(isAttached: Bool) {
+        let app = open(isAttached ? "SwiftUI content · Attached" : "SwiftUI content · Modal")
+        app.buttons["Open SwiftUI content"].tap()
+        XCTAssertTrue(app.buttons["Hosted count 0"].waitForExistence(timeout: 5))
+        app.buttons["Hosted count 0"].tap()
+        app.buttons["Content"].tap()
+        XCTAssertTrue(app.staticTexts["Selection: content"].waitForExistence(timeout: 5))
+        let grabber = handle(in: app)
+        let initialY = grabber.frame.minY
+        app.buttons["Resize hosted content"].tap()
+        XCTAssertTrue(wait { grabber.frame.minY < initialY - 80 })
+        app.buttons["Update title"].tap()
+        XCTAssertTrue(app.staticTexts["Updated hosted title"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["Hosted count 1"].exists)
+        capture(isAttached ? "SwiftUI content in UIKit attachment" : "SwiftUI content in UIKit modal", app)
+        app.buttons["Maximum"].tap()
+        XCTAssertTrue(app.staticTexts["Selection: maximum"].waitForExistence(timeout: 5))
+        app.buttons["Push from hosted content"].tap()
+        if isAttached {
+            XCTAssertTrue(app.navigationBars["Bridge detail"].waitForExistence(timeout: 5))
+            XCTAssertFalse(app.buttons["Close hosted content"].isHittable)
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+            XCTAssertTrue(app.buttons["Hosted count 1"].waitForExistence(timeout: 5))
+            XCTAssertTrue(app.staticTexts["Selection: maximum"].exists)
+        } else {
+            XCTAssertTrue(app.buttons["Close hosted content"].isHittable)
+            XCTAssertTrue(app.buttons["Hosted count 1"].exists)
+        }
+        app.buttons["Close hosted content"].tap()
+        if !isAttached {
+            XCTAssertTrue(app.navigationBars["Bridge detail"].waitForExistence(timeout: 5))
+            app.navigationBars.buttons.element(boundBy: 0).tap()
+        }
+        XCTAssertTrue(app.staticTexts["Dismissals: 1"].waitForExistence(timeout: 5))
+        app.buttons["Dismiss old presentation"].tap()
+        XCTAssertTrue(app.staticTexts["Dismissals: 1"].exists)
+        app.buttons["Open SwiftUI content"].tap()
+        XCTAssertTrue(app.buttons["Hosted count 0"].waitForExistence(timeout: 5))
+        app.buttons["Close hosted then navigate"].tap()
+        XCTAssertTrue(app.navigationBars["Bridge detail"].waitForExistence(timeout: 5))
+        app.navigationBars.buttons.element(boundBy: 0).tap()
+        XCTAssertTrue(app.staticTexts["Dismissals: 2"].waitForExistence(timeout: 5))
+    }
+
+    @MainActor
     func testModalSelectionMeasurementAndRepeatedDismissal() {
         let app = open("Modal")
         app.buttons["Open sheet"].tap()

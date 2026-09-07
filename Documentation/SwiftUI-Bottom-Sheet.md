@@ -1,6 +1,6 @@
-# SwiftUI Modal Bottom Sheet
+# SwiftUI Bottom Sheet
 
-`bottomSheet` presents a TideSheet surface in an independent SwiftUI modal scope. It can be installed on a small button without limiting the sheet to that button's bounds. Use `attachedSheet` when the surface should belong to the chosen view's bounds and hierarchy.
+`bottomSheet` is the single SwiftUI entry point. `presentation: .modal` (the default) establishes an independent modal scope. `presentation: .attached` follows the declaring page through navigation. Both cover their presentation container, including navigation chrome, even when declared on a small button. See the [attached behavior](SwiftUI-Attached-Sheet.md) for page ownership.
 
 ## Public API
 
@@ -43,6 +43,8 @@ The same four combinations are available in both contexts:
 | `item: Binding<Item?>` | `initialDetent: TideSheetDetent.Id` | `(Item) -> Content` |
 | `item: Binding<Item?>` | `selectedDetent: Binding<TideSheetDetent.Id>` | `(Item) -> Content` |
 
+Every overload accepts `presentation: SheetPresentation = .modal`. The style is captured once when each presentation starts. Changing it while open affects the next presentation, without resetting content or detent selection.
+
 Every overload requires `detents: Set<TideSheetDetent>` and accepts an optional `onDismiss`. `Item` requires only `Identifiable`. The set is unordered: `initialDetent` selects the starting position, or the selection binding supplies it. The two selection parameters never appear together.
 
 Content receives the same `@Environment(\.sheet)` actions as an attachment:
@@ -82,6 +84,8 @@ SwiftUI's `@Environment(\.dismiss)` is still available inside modal content. Cal
 
 Pushing the underlying `NavigationStack` keeps the modal above the new route. The example verifies that its local content state survives this operation. TideSheet neither inspects the navigation stack nor moves the pushed route above the modal. The modifier still needs an owned SwiftUI host; an independent presentation scope is not a global presenter.
 
+While that modal remains visible, input reconciliation continues in its presented content tree even if the original route is offscreen. Item updates and replacement therefore remain active; replacement starts from the old carrier's dismissal completion. This is verified for both native SwiftUI content and the UIKit-content example.
+
 If the host's SwiftUI state is released, its active presentation also emits a one-shot termination notification. That fallback does not clear a shared external binding or promise a surviving carrier animation. Merely receiving `onDisappear` does not end the presentation. Arbitrary navigation rewrites that retain offscreen state remain outside the verified host-removal contract.
 
 ## Geometry and current limits
@@ -94,6 +98,6 @@ The initial modal path shares the attached surface's single intrinsic-content hi
 
 Runtime validation covers portrait iPhone 17 Pro Max on iOS 26.5: all four API combinations, small-view presentation, detent selection, drag dismissal, item updates/replacement, repeated closure, system dismissal, and navigation ordering. Screenshots also verify the transparent backdrop and independent scope. The package compiles with an iOS 17 deployment target, but minimum-version runtime checks have not been performed.
 
-Rotation, compact height, iPad, multi-scene behavior, the full accessibility matrix, visual and animation configuration, multiple-sheet coordination, and UIKit content remain future work. Content keyboard layout and scrolling remain content responsibilities. This is an initial SwiftUI modal slice, not a tagged release or the completed cross-renderer contract.
+Rotation, compact height, iPad, multi-scene behavior, the full accessibility matrix, visual and animation configuration, and multiple-sheet coordination remain future work. A [UIKit-content example](Cross-Content-Bridges.md) now uses the system representable API; dedicated bridge conveniences remain open. Content keyboard layout and scrolling remain content responsibilities. This is an initial SwiftUI modal slice, not a tagged release or the completed cross-renderer contract.
 
-See the [runnable example](../Examples/AttachedSheet/README.md) and [roadmap](Roadmap.md).
+See the [runnable example](../Examples/SwiftUI/README.md) and [roadmap](Roadmap.md).
